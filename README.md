@@ -77,10 +77,11 @@ SANITY_API_READ_TOKEN="your-read-token"
 ### Shopify Configuration
 
 1. Set up a Shopify store (or use an existing one)
-2. Create a custom app in your Shopify Admin (Apps > Develop apps > Create an app)
-3. Set up the Storefront API permissions
-4. Generate a Storefront API token
-5. Add Shopify variables to `storefront/.env`:
+2. Install the [Sanity Connect App](https://apps.shopify.com/sanity-connect)
+3. Create a custom app in your Shopify Admin (Apps > Develop apps > Create an app)
+4. Set up the Storefront API permissions
+5. Generate a Storefront API token
+6. Add Shopify variables to `storefront/.env`:
 
 ```
 SHOPIFY_STOREFRONT_ACCESS_TOKEN="your-token"
