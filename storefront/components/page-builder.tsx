@@ -2,7 +2,7 @@
 
 import { SanityDocument } from "next-sanity";
 import { useOptimistic } from "next-sanity/hooks";
-import Link from "next/link";
+import { Link } from 'next-view-transitions'
 
 import {
   COLLECTION_QUERYResult,

@@ -22,6 +22,40 @@ const pageBuilderFields = /* groq */ `
   },
   content,
   "textColor": coalesce(textColor.hex, 'black'),
+  "columns": columns[] {
+    _key,
+    _type,
+    "columnSpan": select(_type == "imageBlock" => coalesce(columnSpan, 1), 1),
+    // productBlock
+    "product": select(_type == "productBlock" => product-> {
+      "title": store.title,
+      "slug": store.slug.current,
+      "price": store.priceRange.minVariantPrice,
+      "imageUrl": store.previewImageUrl,
+      "hoverMedia": gallery[featuredHover == true][0].media {
+        mediaType,
+        "imageUrl": select(mediaType == "image" => image.asset->url),
+        "playbackId": select(mediaType == "video" => video.asset->playbackId),
+      },
+    }),
+    // imageBlock
+   "items": select(_type == "imageBlock" => items[] {
+      mediaType,
+      "image": select(mediaType == "image" => {
+        "_type": "image",
+        "asset": image.asset,
+        "crop": image.crop,
+        "hotspot": image.hotspot,
+        "alt": image.alt,
+      }),
+      "video": select(mediaType == "video" => {
+        "playbackId": video.asset->playbackId,
+        "aspectRatio": video.asset->data.aspect_ratio,
+      }),
+    }),
+    "title": select(_type == "imageBlock" => title),
+    "description": select(_type == "imageBlock" => description),
+  }
 `;
 
 const linkFields = /* groq */ `
@@ -90,6 +124,22 @@ export const HOME_QUERY = defineQuery(`
     "status": select(_id in path("drafts.**") => "draft", "published"),
     "name": "Home",
     "slug": "/",
+    "pageBuilder": pageBuilder[]{
+      ${pageBuilderFields}
+    },
+    pageSeo{${pageSeoFields}}
+  }
+`);
+
+export const SHOP_QUERY = defineQuery(`
+  *[_type == 'shop'][0]{
+    _type,
+    _id,
+    _updatedAt,
+    _createdAt,
+    "status": select(_id in path("drafts.**") => "draft", "published"),
+    "name": "Shop",
+    "slug": "/products",
     "pageBuilder": pageBuilder[]{
       ${pageBuilderFields}
     },
@@ -169,7 +219,21 @@ export const PRODUCT_QUERY = defineQuery(`
     "status": select(_id in path("drafts.**") => "draft", "published"),
     "name": coalesce(name, "Untitled Page"),
     "slug": store.slug.current,
-
+   "gallery": gallery[] {
+      "mediaType": media.mediaType,
+      "image": select(media.mediaType == "image" => {
+        "_type": "image",
+        "asset": media.image.asset,
+        "crop": media.image.crop,
+        "hotspot": media.image.hotspot,
+        "alt": media.image.alt,
+      }),
+      "video": select(media.mediaType == "video" => {
+        "playbackId": media.video.asset->playbackId,
+        "aspectRatio": media.video.asset->data.aspect_ratio,
+      }),
+      "featuredHover": featuredHover,
+    },
     pageBuilder[]{
       ${pageBuilderFields}
     },
@@ -197,5 +261,117 @@ export const ALL_COLLECTION_PAGES_SLUGS = defineQuery(`
 
 export const ALL_PAGES_SLUGS = defineQuery(`
   *[_type == "page" && defined(slug.current)]
+  {"slug": slug.current}
+`);
+
+const blogPageBuilderFields = /* groq */ `
+  _key,
+  _type,
+  // blogColumnBlock
+  "columns": select(_type == "blogColumnBlock" => columns[]{
+    _key,
+    columnType,
+    "media": select(columnType == "media" => {
+      "mediaType": media.mediaType,
+      "image": select(media.mediaType == "image" => {
+        "_type": "image",
+        "asset": media.image.asset,
+        "crop": media.image.crop,
+        "hotspot": media.image.hotspot,
+        "alt": media.image.alt,
+      }),
+      "video": select(media.mediaType == "video" => {
+        "playbackId": media.video.asset->playbackId,
+        "aspectRatio": media.video.asset->data.aspect_ratio,
+      }),
+    }),
+    "text": select(columnType == "text" => text),
+  }),
+  "columnCount": select(_type == "blogColumnBlock" => columnCount),
+  // blogContentBlock
+  "content": select(_type == "blogContentBlock" => content),
+  // blogFullwidthBlock
+  "media": select(_type == "blogFullwidthBlock" => {
+    "mediaType": media.mediaType,
+    "image": select(media.mediaType == "image" => {
+      "_type": "image",
+      "asset": media.image.asset,
+      "crop": media.image.crop,
+      "hotspot": media.image.hotspot,
+      "alt": media.image.alt,
+    }),
+    "video": select(media.mediaType == "video" => {
+      "playbackId": media.video.asset->playbackId,
+      "aspectRatio": media.video.asset->data.aspect_ratio,
+    }),
+  }),
+  "caption": select(_type == "blogFullwidthBlock" => caption),
+`;
+
+export const ARCHIVE_QUERY = defineQuery(`
+  *[_type == "archive"][0]{
+    _type,
+    _id,
+    title,
+    description,
+    pageSeo{${pageSeoFields}}
+  }
+`);
+
+export const ALL_POSTS_QUERY = defineQuery(`
+  *[_type == "post"] | order(date desc){
+    _id,
+    title,
+    "slug": slug.current,
+    date,
+    excerpt,
+    "cover": {
+      "mediaType": cover.mediaType,
+      "image": select(cover.mediaType == "image" => {
+        "_type": "image",
+        "asset": cover.image.asset,
+        "crop": cover.image.crop,
+        "hotspot": cover.image.hotspot,
+        "alt": cover.image.alt,
+      }),
+      "video": select(cover.mediaType == "video" => {
+        "playbackId": cover.video.asset->playbackId,
+        "aspectRatio": cover.video.asset->data.aspect_ratio,
+      }),
+    },
+  }
+`);
+
+export const POST_QUERY = defineQuery(`
+  *[_type == "post" && slug.current == $slug][0]{
+    _type,
+    _id,
+    title,
+    "slug": slug.current,
+    date,
+    excerpt,
+    "cover": {
+      "mediaType": cover.mediaType,
+      "image": select(cover.mediaType == "image" => {
+        "_type": "image",
+        "asset": cover.image.asset,
+        "crop": cover.image.crop,
+        "hotspot": cover.image.hotspot,
+        "alt": cover.image.alt,
+      }),
+      "video": select(cover.mediaType == "video" => {
+        "playbackId": cover.video.asset->playbackId,
+        "aspectRatio": cover.video.asset->data.aspect_ratio,
+      }),
+    },
+    "pageBuilder": pageBuilder[]{
+      ${blogPageBuilderFields}
+    },
+    pageSeo{${pageSeoFields}}
+  }
+`);
+
+export const ALL_POST_SLUGS = defineQuery(`
+  *[_type == "post" && defined(slug.current)]
   {"slug": slug.current}
 `);

@@ -1,19 +1,28 @@
-// Export an array of all the schema types.  This is used in the Sanity Studio configuration. https://www.sanity.io/docs/schema-types
-
 import { collection } from "./documents/collection";
 import { page } from "./documents/page";
+import { post } from "./documents/post";
 import { product } from "./documents/product";
 import { productVariant } from "./documents/product-variant";
+
 import { blockContent } from "./objects/editorial/block-content";
+import { blogColumnBlock } from "./objects/editorial/blog-column-block";
+import { blogContentBlock } from "./objects/editorial/blog-content-block";
+import { blogFullwidthBlock } from "./objects/editorial/blog-fullwidth-block";
+import { contentRow } from "./objects/editorial/content-row";
 import { editorialBlock } from "./objects/editorial/editorial-block";
+import { imageBlock } from "./objects/editorial/image-block";
+import { media } from "./objects/editorial/media";
 import { newsletter } from "./objects/editorial/newsletter";
 import { picture } from "./objects/editorial/picture";
+import { productBlock } from "./objects/editorial/product-block";
 import { productInformation } from "./objects/editorial/product-information";
+
 import { announcementBar } from "./objects/global/announcement-bar";
 import { footer } from "./objects/global/footer";
 import { header } from "./objects/global/header";
 import { link } from "./objects/global/link";
 import { pageSeo } from "./objects/global/page-seo";
+
 import { inventory } from "./objects/shopify/inventory";
 import { option } from "./objects/shopify/option";
 import { placeholderString } from "./objects/shopify/placeholder-string";
@@ -24,32 +33,44 @@ import { shopifyCollection } from "./objects/shopify/shopify-collection";
 import { shopifyCollectionRule } from "./objects/shopify/shopify-collection-rule";
 import { shopifyProduct } from "./objects/shopify/shopify-product";
 import { shopifyProductVariant } from "./objects/shopify/shopify-product-variant";
+
+import { archive } from "./singletons/archive";
 import { home } from "./singletons/home";
 import { settings } from "./singletons/settings";
+import { shop } from "./singletons/shop";
 
 export const schemaTypes = [
   // Singletons
   settings,
   home,
+  shop,
+  archive,
   // Documents
   collection,
   page,
+  post,
   product,
   productVariant,
-  // Objects
-  /// Editorial
+  // Objects — Editorial
   blockContent,
+  blogColumnBlock,
+  blogContentBlock,
+  blogFullwidthBlock,
+  contentRow,
   editorialBlock,
-  picture,
+  imageBlock,
+  media,
   newsletter,
+  picture,
+  productBlock,
   productInformation,
-  /// Global
-  pageSeo,
-  link,
-  header,
-  footer,
+  // Objects — Global
   announcementBar,
-  /// Shopify
+  footer,
+  header,
+  link,
+  pageSeo,
+  // Objects — Shopify
   inventory,
   option,
   placeholderString,

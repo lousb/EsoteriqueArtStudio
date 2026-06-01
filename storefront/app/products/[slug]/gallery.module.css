@@ -48,3 +48,22 @@
   opacity: 1;
   border-color: var(--color-text, currentColor);
 }
+
+.page {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  align-items: start;
+}
+
+.gallery {
+  grid-column: span 2;
+}
+
+.productDetails {
+  grid-column: 3 / 4;
+  position: sticky;
+  top: 6rem;
+  max-height: calc(100vh - 7rem);
+  overflow-y: auto;
+}

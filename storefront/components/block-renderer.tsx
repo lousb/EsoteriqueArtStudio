@@ -1,6 +1,6 @@
 import React from "react";
 import { dataAttr } from "../sanity/utils";
-import { EditorialBlock } from "./editorial-block";
+import { ContentRow } from "./content-row";
 import Newsletter from "./newsletter";
 type BlocksType = {
   [key: string]: React.FC<any>;
@@ -19,9 +19,8 @@ type BlockProps = {
 };
 
 const Blocks: BlocksType = {
-  editorialBlock: EditorialBlock,
   newletter: Newsletter,
-  // add other blocks types
+  contentRow: ContentRow,
 };
 
 /**

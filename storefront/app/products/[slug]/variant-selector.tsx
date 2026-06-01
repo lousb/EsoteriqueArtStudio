@@ -29,10 +29,7 @@ export function VariantSelector({
 
   if (hasNoOptions) {
     return (
-      <Price
-        amount={priceRange.minVariantPrice.amount}
-        currencyCode={priceRange.minVariantPrice.currencyCode}
-      />
+      <></>
     );
   }
 
@@ -59,17 +56,10 @@ export function VariantSelector({
       <span>
         {selectedVariant ? (
           <>
-            <Price
-              amount={selectedVariant.price.amount}
-              currencyCode={selectedVariant.price.currencyCode}
-            />
+            
           </>
         ) : (
           <>
-            <Price
-              amount={priceRange.minVariantPrice.amount}
-              currencyCode={priceRange.minVariantPrice.currencyCode}
-            />
             {!hasJustOneOption && (
               <>
                 {" — "}
@@ -128,7 +118,7 @@ export function VariantSelector({
                       key={value}
                       aria-disabled={!isAvailableForSale}
                       disabled={!isAvailableForSale}
-                      title={`${option.name} ${value}${!isAvailableForSale ? " (Out of Stock)" : ""}`}
+                      title={`${option.name} ${value}${!isAvailableForSale ? " (Unavailable)" : ""}`}
                       className={cx(
                         s.option,
                         isActive && s.active,

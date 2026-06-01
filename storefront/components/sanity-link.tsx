@@ -1,4 +1,4 @@
-import NextLink from "next/link";
+import { Link } from 'next-view-transitions'
 import { LinkFieldsType } from "../data/sanity/queries";
 
 export default function SanityLink({
@@ -19,12 +19,12 @@ export default function SanityLink({
           {" ↗"}
         </a>
       ) : (
-        <NextLink
+        <Link
           href={link?.url || "#"}
           target={link.openInNewTab ? "_blank" : "_self"}
         >
           {children}
-        </NextLink>
+        </Link>
       )}
     </>
   );

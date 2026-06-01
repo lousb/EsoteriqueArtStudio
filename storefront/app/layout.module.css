@@ -1,8 +1,8 @@
 .header {
   z-index: var(--header-z-index);
   width: 100%;
-  background: black;
-  color: white;
+  background: white;
+  color: black;
 }
 
 .annoucementBar {
@@ -24,14 +24,42 @@
 }
 
 .footer {
-  background: black;
-  color: white;
+  background: white;
+  color: black;
   display: flex;
   justify-content: space-between;
   padding: var(--main-padding);
   @media (max-width: 768px) {
     flex-direction: column;
   }
+}
+
+.headerGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  align-items: center;
+  width: 100%;
+  padding: 1rem 0;
+}
+
+.navLinks {
+  display: flex;
+  gap: 1rem;
+}
+
+.navLinks a {
+  opacity: 0.35;
+  transition: opacity 0.2s ease;
+}
+
+.navLinks a:hover,
+.navLinks a[data-active="true"] {
+  opacity: 1;
+}
+
+.cartCol {
+  display: flex;
+  justify-content: flex-end;
 }
 
 .footer ul {

@@ -1,8 +1,3 @@
-/**
- * This config is used to configure your Sanity Studio.
- * Learn more: https://www.sanity.io/docs/configuration
- */
-
 import { visionTool } from "@sanity/vision";
 import { defineConfig } from "sanity";
 import {
@@ -12,29 +7,21 @@ import {
   type DocumentLocation,
 } from "sanity/presentation";
 import { structureTool } from "sanity/structure";
-
 import { colorInput } from "@sanity/color-input";
 import { customDocumentActions } from "./src/custom-document-action";
 import { schemaTypes } from "./src/schema-types";
 import { structure } from "./src/structure";
 import { singletonTypes } from "./src/structure/singletons";
+import { muxInput } from "sanity-plugin-mux-input";
 
-// Environment variables for project configuration
-const projectId = process.env.SANITY_STUDIO_PROJECT_ID || "your-projectID";
+const projectId = process.env.SANITY_STUDIO_PROJECT_ID || "5d2pzqv7";
 const dataset = process.env.SANITY_STUDIO_DATASET || "production";
-
-// URL for preview functionality, defaults to localhost:3000 if not set
 const SANITY_STUDIO_PREVIEW_URL =
   process.env.SANITY_STUDIO_PREVIEW_URL || "http://localhost:3000";
 
-// Define the home location for the presentation tool
-const homeLocation = {
-  title: "Home",
-  href: "/",
-} satisfies DocumentLocation;
+const homeLocation = { title: "Home", href: "/" } satisfies DocumentLocation;
+const shopLocation = { title: "Shop", href: "/products" } satisfies DocumentLocation;
 
-// resolveHref() is a convenience function that resolves the URL
-// path for different document types and used in the presentation tool.
 function resolveHref(documentType?: string, slug?: string): string | undefined {
   switch (documentType) {
     case "product":
@@ -43,20 +30,20 @@ function resolveHref(documentType?: string, slug?: string): string | undefined {
       return slug ? `/${slug}` : undefined;
     case "home":
       return "/";
+    case "shop":
+      return "/products";
     default:
       console.warn("Invalid document type:", documentType);
       return undefined;
   }
 }
 
-// Main Sanity configuration
 export default defineConfig({
   name: "default",
   title: "Sanity Photon",
   projectId,
   dataset,
   plugins: [
-    // Presentation tool configuration for Visual Editing
     presentationTool({
       title: "Preview",
       previewUrl: {
@@ -66,11 +53,14 @@ export default defineConfig({
         },
       },
       resolve: {
-        // The Main Document Resolver API provides a method of resolving a main document from a given route or route pattern. https://www.sanity.io/docs/presentation-resolver-api#57720a5678d9
         mainDocuments: defineDocuments([
           {
             route: "/",
             filter: `_type == "home"`,
+          },
+          {
+            route: "/products",
+            filter: `_type == "shop"`,
           },
           {
             route: "/:slug",
@@ -80,19 +70,29 @@ export default defineConfig({
             route: "/products/:slug",
             filter: `_type == "product" && slug.current == $slug || _id == $slug`,
           },
+          {
+            route: "/archive",
+            filter: `_type == "archive"`,
+          },
+          {
+            route: "/archive/:slug",
+            filter: `_type == "post" && slug.current == $slug`,
+          },
         ]),
-        // Locations Resolver API allows you to define where data is being used in your application. https://www.sanity.io/docs/presentation-resolver-api#8d8bca7bfcd7
         locations: {
           settings: defineLocations({
             locations: [homeLocation],
             message: "This document is used on all pages",
             tone: "positive",
           }),
+          home: defineLocations({
+            locations: [homeLocation],
+          }),
+          shop: defineLocations({
+            locations: [shopLocation],
+          }),
           page: defineLocations({
-            select: {
-              name: "name",
-              slug: "slug.current",
-            },
+            select: { name: "name", slug: "slug.current" },
             resolve: (doc) => ({
               locations: [
                 {
@@ -103,36 +103,37 @@ export default defineConfig({
             }),
           }),
           product: defineLocations({
-            select: {
-              title: "title",
-              slug: "slug.current",
-            },
+            select: { title: "title", slug: "slug.current" },
             resolve: (doc) => ({
               locations: [
                 {
                   title: doc?.title || "Untitled",
                   href: resolveHref("product", doc?.slug)!,
                 },
-                {
-                  title: "Home",
-                  href: "/",
-                } satisfies DocumentLocation,
+                { title: "Home", href: "/" } satisfies DocumentLocation,
               ].filter(Boolean) as DocumentLocation[],
+            }),
+          }),
+          archive: defineLocations({
+            locations: [{ title: "Archive", href: "/archive" }],
+          }),
+          post: defineLocations({
+            select: { title: "title", slug: "slug.current" },
+            resolve: (doc) => ({
+              locations: [{ title: doc?.title || "Untitled", href: `/archive/${doc?.slug}` }],
             }),
           }),
         },
       },
     }),
-    structureTool({
-      structure, // Custom studio structure configuration, imported from ./src/structure.ts
-    }),
-    // Additional plugins for enhanced functionality
+    structureTool({ structure }),
     visionTool({ title: "API" }),
     colorInput(),
     customDocumentActions(),
+    muxInput({
+      mp4_support: "standard",
+    }),
   ],
-
-  // Schema configuration, imported from ./src/schema/index.ts
   schema: {
     types: schemaTypes,
     templates: (templates) =>
@@ -140,11 +141,8 @@ export default defineConfig({
   },
   tools: (prev, context) =>
     prev.filter((tool) => {
-      if (tool.name === "schedules") {
-        return false;
-      } else if (!context.currentUser && tool.name === "presentation") {
-        return false;
-      }
+      if (tool.name === "schedules") return false;
+      if (!context.currentUser && tool.name === "presentation") return false;
       return true;
     }),
 });

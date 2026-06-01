@@ -1,6 +1,38 @@
 @import url("./reset.css");
 @import url("./utils.css");
 
+/* New page slides in from the right */
+@keyframes slide-in {
+  from {
+    transform: translateY(4vw);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Old page slides out to the left */
+@keyframes slide-out {
+  from {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(-4vw);
+    opacity: 0;
+  }
+}
+
+::view-transition-old(root) {
+  animation: 400ms ease both slide-out;
+}
+
+::view-transition-new(root) {
+  animation: 400ms ease both slide-in;
+}
+
 :root {
   --color-text: #000000;
   --color-text-muted: #878580;
@@ -15,7 +47,11 @@
   --font-size: 12px;
   --font-sans-serif: "Arial", ui-sans-serif, system-ui, sans-serif;
 }
-
+body{
+  margin-inline: 14px;
+  font-family: var(--font-inter);
+  letter-spacing: 0.02em;
+}
 .main-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(25rem, 1fr));
@@ -53,12 +89,85 @@
 }
 
 .product-card {
+  background-color: #F1F1F1;
   position: relative;
   aspect-ratio: 0.7;
   margin: auto;
+
+  img{
+    mix-blend-mode: multiply;
+  }
+  
 
   @media (max-width: 480px) {
     aspect-ratio: 0.8;
     width: 90%;
   }
+}
+
+.product-card-image{
+    mix-blend-mode: multiply;
+  }
+
+/* content-row mobile */
+@media (max-width: 768px) {
+  [data-content-row] {
+    grid-template-columns: 1fr !important;
+  }
+
+  [data-content-row] > * {
+    grid-column: span 1 !important;
+  }
+}
+
+@media (max-width: 768px) {
+  [data-image-block-container] {
+    aspect-ratio: 0.7 !important;
+  }
+}
+
+.product-block__hover {
+  opacity: 0;
+}
+
+.product-block:has(.product-block__hover):hover .product-block__primary {
+  opacity: 0;
+}
+
+.product-block:has(.product-block__hover):hover .product-block__hover {
+  opacity: 1;
+}
+
+mux-player {
+  --playback-rate-menu-button: none;
+  --pip-button: none;
+  --seek-backward-button: none;
+  --seek-forward-button: none;
+  --fullscreen-button: none;
+  --volume-range: none;
+  --rendition-menu-button: none;
+  --media-object-fit: cover;
+  --media-object-position: center;
+  --controls: none;
+}
+
+.post-cover{
+  aspect-ratio: 5 / 4 !important;
+}
+
+
+
+.blog-fullwidth-block{
+
+}
+.blog-content-block{
+
+}
+.blog-post-page p, .blog-post-page h1{
+  width:75%;
+  font-size: 1.2rem;
+  padding-bottom:1ch;
+}
+.total-checkout{
+  padding-top:2rem;
 }

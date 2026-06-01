@@ -55,6 +55,52 @@ export const product = defineType({
       group: "editorial",
     }),
     defineField({
+      name: "gallery",
+      title: "Gallery",
+      description: "Additional media shown after the Shopify featured image.",
+      type: "array",
+      of: [
+        {
+          type: "object",
+          name: "galleryItem",
+          fields: [
+            defineField({
+              name: "media",
+              type: "media",
+              validation: (Rule) => Rule.required(),
+            }),
+            defineField({
+              name: "featuredHover",
+              title: "Use as hover image on product cards",
+              type: "boolean",
+              initialValue: false,
+            }),
+          ],
+          preview: {
+            select: {
+              mediaType: "media.mediaType",
+              image: "media.image",
+              featuredHover: "featuredHover",
+            },
+            prepare({ mediaType, image, featuredHover }) {
+              return {
+                title: featuredHover ? "⭐ Hover" : mediaType === "video" ? "Video" : "Image",
+                media: image,
+              };
+            },
+          },
+        },
+      ],
+      validation: (Rule) =>
+        Rule.custom((gallery: any[] | undefined) => {
+          if (!gallery) return true;
+          const featured = gallery.filter((item) => item.featuredHover);
+          if (featured.length > 1) return "Only one item can be set as the hover image.";
+          return true;
+        }),
+      group: "editorial",
+    }),
+    defineField({
       name: "pageBuilder",
       title: "Page Builder",
       group: "editorial",

@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from 'next-view-transitions'
 import NextImage from "next/image";
 import { sanityFetch } from "../../data/sanity";
 import { ALL_COLLECTIONS_QUERY } from "../../data/sanity/queries";

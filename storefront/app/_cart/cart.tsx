@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from 'next-view-transitions'
 import { useEffect, useState } from "react";
 import { useFormStatus } from "react-dom";
 import Price from "../../components/price";
@@ -48,6 +48,13 @@ export function Cart() {
         </button>
       )}
       {isOpen && (
+         <>
+    {/* Blurred overlay */}
+        <div
+          className={s.overlay}
+          onClick={closeCart}
+          aria-hidden="true"
+        />
         <aside className={s.cart}>
           {!cart || cart.lines.length === 0 ? (
             <div>
@@ -146,15 +153,6 @@ export function Cart() {
               <div className="total-checkout">
                 <div>
                   <div>
-                    <p>Taxes</p>
-                    <p>
-                      <Price
-                        amount={cart.cost.totalTaxAmount.amount}
-                        currencyCode={cart.cost.totalTaxAmount.currencyCode}
-                      />
-                    </p>
-                  </div>
-                  <div>
                     <p>Shipping calculated at checkout</p>
                   </div>
                   <div>
@@ -179,6 +177,7 @@ export function Cart() {
             </div>
           )}
         </aside>
+        </>
       )}
     </>
   );

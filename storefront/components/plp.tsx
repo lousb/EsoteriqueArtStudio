@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { getCollectionProducts, getProducts } from "../data/shopify";
-import NextLink from "next/link";
+import { Link } from 'next-view-transitions'
 import NextImage from "next/image";
 import Price from "./price";
 
@@ -28,7 +28,7 @@ export async function PLP(props: { collectionSlug?: string; tags: string[] }) {
           .map((product) => {
             return (
               <article key={product.id}>
-                <NextLink href={`/products/${product.handle}`}>
+                <Link href={`/products/${product.handle}`}>
                   <figure className="product-card">
                     <NextImage
                       src={product.featuredImage.url || ""}
@@ -49,7 +49,7 @@ export async function PLP(props: { collectionSlug?: string; tags: string[] }) {
                       </span>
                     </figcaption>
                   </figure>
-                </NextLink>
+                </Link>
               </article>
             );
           })}

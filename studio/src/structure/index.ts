@@ -1,4 +1,4 @@
-import { AsteriskIcon, CubeIcon, DocumentTextIcon } from "@sanity/icons";
+import { AsteriskIcon, CubeIcon, DocumentTextIcon, EditIcon } from "@sanity/icons";
 
 import type { StructureResolver } from "sanity/structure";
 import { singletonListItem, SINGLETONS } from "./singletons";
@@ -14,11 +14,14 @@ export const structure: StructureResolver = (S, _) =>
     .title("Storefront Content")
     .items([
       singletonListItem(S, SINGLETONS.home),
+      singletonListItem(S, SINGLETONS.shop),
+      singletonListItem(S, SINGLETONS.archive),
       S.documentTypeListItem("page").title("Pages").icon(DocumentTextIcon),
+      S.divider(),
+      S.documentTypeListItem("post").title("Posts").icon(EditIcon),
       S.divider(),
       S.documentTypeListItem("collection").title("Collections").icon(CubeIcon),
       S.documentTypeListItem("product").title("Products").icon(AsteriskIcon),
       S.divider(),
-      // Settings Singleton in order to view/edit the one particular document for Settings.  Learn more about Singletons: https://www.sanity.io/docs/create-a-link-to-a-single-edit-page-in-your-main-document-type-list
       singletonListItem(S, SINGLETONS.settings),
     ]);

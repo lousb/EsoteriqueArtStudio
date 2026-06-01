@@ -13,11 +13,24 @@ import { resolveOpenGraphImage } from "../sanity/utils";
 import { handleError } from "./client-utils";
 
 import SanityLink from "../components/sanity-link";
+import { Inter } from 'next/font/google'
 
 import Newsletter from "../components/newsletter";
 import { CartProvider } from "./_cart/cart-context";
 import { LocalCart } from "./_cart/local-cart";
 import s from "./layout.module.css";
+
+import { Link, ViewTransitions } from 'next-view-transitions'
+import LenisProvider from "../components/lenis-provider";
+import { Suspense } from "react";
+import { NavLinks } from "../components/nav-links";
+
+const inter = Inter({
+  subsets: ['latin'],
+  weight: ['500'], // medium only
+  display: 'swap', // prevents invisible text
+})
+
 
 /**
  * Generate metadata for the page.
@@ -38,7 +51,7 @@ export async function generateMetadata(): Promise<Metadata> {
   ]);
   const title = settings?.title || "Sanity Photon";
   const description =
-    home?.pageSeo?.description || "An E-commerce starter by Soufiane @jazsouf";
+    home?.pageSeo?.description || "Esoterique Art Studio";
 
   const ogImage = resolveOpenGraphImage(home?.pageSeo?.ogImage);
   let metadataBase: URL | undefined = undefined;
@@ -70,7 +83,8 @@ export default async function RootLayout({
   const { isEnabled: isDraftMode } = await draftMode();
 
   return (
-    <html lang="en">
+    <ViewTransitions>
+    <html lang="en" className={inter.className}>
       <body>
         {/* The <Toaster> component is responsible for rendering toast notifications used in /app/client-utils.ts and /app/components/DraftModeToast.tsx */}
         <Toaster />
@@ -86,45 +100,34 @@ export default async function RootLayout({
         {/* We'll keep a static store to demonstrate functionality. For a complete e-commerce solution, the cart should have server state in the form of cookies */}
         <CartProvider>
           <Header />
-          <main>{children}</main>
+          <main>
+            <Suspense fallback={null}>
+            <LenisProvider>
+              <div className="overlay"></div>
+              <div className="overlay-shadow"></div>
+              {children}
+              </LenisProvider>
+            </Suspense>
+           </main>
+         
           <Footer />
         </CartProvider>
       </body>
     </html>
+    </ViewTransitions>
   );
 }
 
-export async function Header() {
-  const { data: settings } = await sanityFetch({
-    query: SETTINGS_QUERY,
-  });
-
-  const header = settings?.header;
-
+export function Header() {
   return (
     <header className={s.header}>
-      <div className={s.annoucementBar}>
-        {header?.announcementBar?.link?.url ? (
-          <SanityLink link={header?.announcementBar?.link}>
-            {header?.announcementBar?.content}
-          </SanityLink>
-        ) : (
-          <div>{header?.announcementBar?.content}</div>
-        )}
-      </div>
       <nav className={s.nav}>
-        <ul role="list" className={s.menu}>
-          {header?.links?.map((link) => {
-            return (
-              <li key={link._key}>
-                <SanityLink link={link}>{link.label}</SanityLink>
-              </li>
-            );
-          })}
-          <li className={s.localCartButton}>
-            <LocalCart />
-          </li>
-        </ul>
+        <div className={s.headerGrid}>
+          <div><Link href="/">ƎE</Link></div>
+          <div />
+          <div><NavLinks /></div>
+          <div className={s.cartCol}><LocalCart /></div>
+        </div>
       </nav>
     </header>
   );
@@ -139,9 +142,9 @@ export async function Footer() {
 
   return (
     <footer className={s.footer}>
-      <h3>
-        Built by <a href="https://soufianee.com">Soufiane</a>
-      </h3>
+      <div>
+        <h5 className={s.aoc}>I respectfully acknowledge the Gadigal people of the Eora Nation as the Traditional Custodians of the land I work on. Sydney, Australia.</h5>
+      </div>
       <ul role="list">
         {footer?.links?.map((link) => {
           return (

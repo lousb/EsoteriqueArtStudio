@@ -3,7 +3,7 @@
   grid-template-columns: repeat(2, 1fr);
   gap: var(--main-gap);
   place-content: center;
-  place-items: center;
+  place-items: start;
   padding: var(--main-padding);
   & > * {
     width: 100%;
@@ -29,8 +29,16 @@
 }
 
 .productDetails {
-  height: 100%;
+  width: 50%;
+  margin-left: 50% !important;
+  max-width: 300px;
+  position: sticky;
+  top: 60;
+  height: calc(100vh - 120px);
   padding-block-start: calc(var(--main-padding) * 2);
+  display: flex;
+  justify-content: space-between;
+  flex-direction: column;
   padding-inline: var(--main-padding);
 }
 
