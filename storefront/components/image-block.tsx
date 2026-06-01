@@ -21,7 +21,7 @@ type ImageBlockProps = {
 };
 
 const PARALLAX_AMOUNT = 60;
-const TAP_THRESHOLD = 5; // px — below this = tap, above = swipe
+const TAP_THRESHOLD = 5;
 
 export function ImageBlock({ items, title, description }: ImageBlockProps) {
   const n = items?.length ?? 0;
@@ -30,19 +30,15 @@ export function ImageBlock({ items, title, description }: ImageBlockProps) {
   const innerRefs = useRef<(HTMLDivElement | null)[]>([]);
   const dotsRef = useRef<HTMLDivElement>(null);
 
-  // Pointer delta tracking for tap-vs-swipe detection
   const pointerStartX = useRef(0);
   const pointerStartY = useRef(0);
 
-  const [emblaRef, emblaApi] = useEmblaCarousel({
-    loop: true,
-    dragFree: false,
-  });
+  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true, dragFree: false });
 
   if (!items || n === 0) return null;
   const isCarousel = n > 1;
 
-  // Sync dot indicator with Embla
+  // Sync dots
   useEffect(() => {
     if (!emblaApi) return;
     const onSelect = () => setSelectedIndex(emblaApi.selectedScrollSnap());
@@ -50,44 +46,43 @@ export function ImageBlock({ items, title, description }: ImageBlockProps) {
     return () => { emblaApi.off("select", onSelect); };
   }, [emblaApi]);
 
-  // Tap handler — only navigate if pointer barely moved (i.e. it's a real tap, not a swipe)
-  const handlePointerDown = useCallback((e: React.PointerEvent) => {
+  // Tap detection on the viewport itself — Embla still gets all pointer events
+  const handlePointerDown = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
     pointerStartX.current = e.clientX;
     pointerStartY.current = e.clientY;
   }, []);
 
-  const handleTap = useCallback((dir: 1 | -1) => (e: React.PointerEvent) => {
+  const handlePointerUp = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+    if (!emblaApi || !isCarousel) return;
     const dx = Math.abs(e.clientX - pointerStartX.current);
     const dy = Math.abs(e.clientY - pointerStartY.current);
     if (dx < TAP_THRESHOLD && dy < TAP_THRESHOLD) {
-      dir === -1 ? emblaApi?.scrollPrev() : emblaApi?.scrollNext();
+      // Tap — use x position relative to element to decide direction
+      const rect = (e.currentTarget as HTMLDivElement).getBoundingClientRect();
+      const tapX = e.clientX - rect.left;
+      tapX < rect.width / 2 ? emblaApi.scrollPrev() : emblaApi.scrollNext();
     }
-  }, [emblaApi]);
+  }, [emblaApi, isCarousel]);
 
   // Parallax
   useEffect(() => {
     if (!containerRef.current) return;
-
     innerRefs.current.forEach((inner) => {
       if (inner) gsap.set(inner, { y: -PARALLAX_AMOUNT / 2 });
     });
-
     const st = ScrollTrigger.create({
       trigger: containerRef.current,
       start: "top bottom",
       end: "bottom top",
     });
-
     return () => st.kill();
   }, [n]);
 
-  // Dots landing animation (unchanged from original)
+  // Dots landing animation
   useEffect(() => {
     if (!isCarousel || !containerRef.current || !dotsRef.current) return;
-
     const container = containerRef.current;
     const dots = dotsRef.current;
-
     const st = ScrollTrigger.create({
       trigger: container,
       start: "top bottom",
@@ -101,7 +96,6 @@ export function ImageBlock({ items, title, description }: ImageBlockProps) {
         gsap.set(dots, { y, overwrite: true });
       },
     });
-
     return () => st.kill();
   }, [isCarousel]);
 
@@ -112,8 +106,13 @@ export function ImageBlock({ items, title, description }: ImageBlockProps) {
         data-image-block-container
         style={{ position: "relative", width: "100%", aspectRatio: "3/4", overflow: "hidden" }}
       >
-        {/* Embla viewport */}
-        <div ref={emblaRef} style={{ width: "100%", height: "100%" }}>
+        {/* Embla viewport — owns ALL pointer events, tap detection piggybacks here */}
+        <div
+          ref={emblaRef}
+          style={{ width: "100%", height: "100%", cursor: isCarousel ? "ew-resize" : undefined }}
+          onPointerDown={isCarousel ? handlePointerDown : undefined}
+          onPointerUp={isCarousel ? handlePointerUp : undefined}
+        >
           <div style={{ display: "flex", width: "100%", height: "100%" }}>
             {items.map((item, i) => (
               <div
@@ -148,30 +147,6 @@ export function ImageBlock({ items, title, description }: ImageBlockProps) {
             ))}
           </div>
         </div>
-
-        {/* Tap zones — only fire if it wasn't a swipe */}
-        {isCarousel && (
-          <>
-            <div
-              onPointerDown={handlePointerDown}
-              onPointerUp={handleTap(-1)}
-              style={{
-                position: "absolute", left: 0, top: 0,
-                width: "50%", height: "100%",
-                zIndex: 3, cursor: "w-resize",
-              }}
-            />
-            <div
-              onPointerDown={handlePointerDown}
-              onPointerUp={handleTap(1)}
-              style={{
-                position: "absolute", right: 0, top: 0,
-                width: "50%", height: "100%",
-                zIndex: 3, cursor: "e-resize",
-              }}
-            />
-          </>
-        )}
 
         {/* Dots */}
         {isCarousel && (
