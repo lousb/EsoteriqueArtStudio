@@ -27,11 +27,13 @@ export function ImageBlock({ items, title, description }: ImageBlockProps) {
   const n = items?.length ?? 0;
   const [selectedIndex, setSelectedIndex] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null); // outer wrapper for dots pin trigger
   const innerRefs = useRef<(HTMLDivElement | null)[]>([]);
   const dotsRef = useRef<HTMLDivElement>(null);
 
   const pointerStartX = useRef(0);
   const pointerStartY = useRef(0);
+  const isTapRef = useRef(false);
 
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true, dragFree: false });
 
@@ -46,22 +48,31 @@ export function ImageBlock({ items, title, description }: ImageBlockProps) {
     return () => { emblaApi.off("select", onSelect); };
   }, [emblaApi]);
 
-  // Tap detection on the viewport itself — Embla still gets all pointer events
   const handlePointerDown = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
     pointerStartX.current = e.clientX;
     pointerStartY.current = e.clientY;
+    isTapRef.current = true;
+  }, []);
+
+  const handlePointerMove = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+    if (!isTapRef.current) return;
+    const dx = Math.abs(e.clientX - pointerStartX.current);
+    const dy = Math.abs(e.clientY - pointerStartY.current);
+    // Once we detect movement, mark as swipe so pointerUp won't also tap
+    if (dx >= TAP_THRESHOLD || dy >= TAP_THRESHOLD) {
+      isTapRef.current = false;
+    }
   }, []);
 
   const handlePointerUp = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
-    if (!emblaApi || !isCarousel) return;
-    const dx = Math.abs(e.clientX - pointerStartX.current);
-    const dy = Math.abs(e.clientY - pointerStartY.current);
-    if (dx < TAP_THRESHOLD && dy < TAP_THRESHOLD) {
-      // Tap — use x position relative to element to decide direction
-      const rect = (e.currentTarget as HTMLDivElement).getBoundingClientRect();
-      const tapX = e.clientX - rect.left;
+    if (!emblaApi || !isCarousel || !isTapRef.current) return;
+    isTapRef.current = false;
+    const rect = (e.currentTarget as HTMLDivElement).getBoundingClientRect();
+    const tapX = e.clientX - rect.left;
+    // Defer so Embla's own pointerUp handler runs first and doesn't fight us
+    requestAnimationFrame(() => {
       tapX < rect.width / 2 ? emblaApi.scrollPrev() : emblaApi.scrollNext();
-    }
+    });
   }, [emblaApi, isCarousel]);
 
   // Parallax
@@ -78,17 +89,18 @@ export function ImageBlock({ items, title, description }: ImageBlockProps) {
     return () => st.kill();
   }, [n]);
 
-  // Dots landing animation
+  // Dots pinning — triggered from wrapperRef (includes dots), clipped never
   useEffect(() => {
-    if (!isCarousel || !containerRef.current || !dotsRef.current) return;
-    const container = containerRef.current;
+    if (!isCarousel || !wrapperRef.current || !dotsRef.current) return;
+    const wrapper = wrapperRef.current;
     const dots = dotsRef.current;
+
     const st = ScrollTrigger.create({
-      trigger: container,
+      trigger: wrapper,
       start: "top bottom",
       end: "bottom bottom",
       onUpdate: () => {
-        const rect = container.getBoundingClientRect();
+        const rect = wrapper.getBoundingClientRect();
         const viewportH = window.innerHeight;
         let y = 0;
         if (rect.bottom > viewportH) y = viewportH - rect.bottom;
@@ -101,54 +113,57 @@ export function ImageBlock({ items, title, description }: ImageBlockProps) {
 
   return (
     <div style={{ width: "100%", height: "100%" }}>
-      <div
-        ref={containerRef}
-        data-image-block-container
-        style={{ position: "relative", width: "100%", aspectRatio: "3/4", overflow: "hidden" }}
-      >
-        {/* Embla viewport — owns ALL pointer events, tap detection piggybacks here */}
+      {/* wrapperRef wraps both the image container AND the dots so dots are never clipped */}
+      <div ref={wrapperRef} style={{ position: "relative", width: "100%", aspectRatio: "3/4" }}>
         <div
-          ref={emblaRef}
-          style={{ width: "100%", height: "100%", cursor: isCarousel ? "ew-resize" : undefined }}
-          onPointerDown={isCarousel ? handlePointerDown : undefined}
-          onPointerUp={isCarousel ? handlePointerUp : undefined}
+          ref={containerRef}
+          data-image-block-container
+          style={{ position: "absolute", inset: 0, overflow: "hidden" }}
         >
-          <div style={{ display: "flex", width: "100%", height: "100%" }}>
-            {items.map((item, i) => (
-              <div
-                key={i}
-                style={{
-                  position: "relative",
-                  minWidth: "100%",
-                  height: "100%",
-                  flexShrink: 0,
-                  overflow: "hidden",
-                }}
-              >
+          <div
+            ref={emblaRef}
+            style={{ width: "100%", height: "100%", cursor: isCarousel ? "ew-resize" : undefined }}
+            onPointerDown={isCarousel ? handlePointerDown : undefined}
+            onPointerMove={isCarousel ? handlePointerMove : undefined}
+            onPointerUp={isCarousel ? handlePointerUp : undefined}
+          >
+            <div style={{ display: "flex", width: "100%", height: "100%" }}>
+              {items.map((item, i) => (
                 <div
-                  ref={(el) => { innerRefs.current[i] = el; }}
+                  key={i}
                   style={{
-                    position: "absolute",
-                    left: 0,
-                    right: 0,
-                    top: 0,
-                    height: `calc(100% + ${PARALLAX_AMOUNT}px)`,
-                    willChange: "transform",
+                    position: "relative",
+                    minWidth: "100%",
+                    height: "100%",
+                    flexShrink: 0,
+                    overflow: "hidden",
                   }}
                 >
-                  <MediaItem
-                    mediaType={item.mediaType}
-                    image={item.image}
-                    video={item.video}
-                    priority={i === 0}
-                  />
+                  <div
+                    ref={(el) => { innerRefs.current[i] = el; }}
+                    style={{
+                      position: "absolute",
+                      left: 0,
+                      right: 0,
+                      top: 0,
+                      height: `calc(100% + ${PARALLAX_AMOUNT}px)`,
+                      willChange: "transform",
+                    }}
+                  >
+                    <MediaItem
+                      mediaType={item.mediaType}
+                      image={item.image}
+                      video={item.video}
+                      priority={i === 0}
+                    />
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
 
-        {/* Dots */}
+        {/* Dots — sibling to overflow:hidden container, never clipped */}
         {isCarousel && (
           <div
             ref={dotsRef}
