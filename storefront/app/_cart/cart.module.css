@@ -236,10 +236,6 @@
   gap: 6px;
 }
 
-.cartCount {
-  font-size: 0.75em;
-  opacity: 0.6;
-}
 
 /* Animations */
 @keyframes fadeIn {

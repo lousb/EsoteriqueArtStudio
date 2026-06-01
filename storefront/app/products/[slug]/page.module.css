@@ -110,16 +110,23 @@
     height: auto;
     padding: var(--main-padding);
     padding-block-start: var(--main-padding);
+     padding: 20px;
   }
 }
 
 .descriptionTop {
   padding-top: 60vh;
+ 
+}
+.descriptionTop h1{
+  padding-bottom:0.4em;
 }
 
 @media (max-width: 768px) {
   .descriptionTop {
     padding-top: 0;
+     width:90%;
+    
   }
 }
 

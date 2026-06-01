@@ -110,6 +110,9 @@ body{
 
 /* content-row mobile */
 @media (max-width: 768px) {
+  .related-products{
+  padding-top:60px !important; 
+}
   [data-content-row] {
     grid-template-columns: 1fr !important;
   }
