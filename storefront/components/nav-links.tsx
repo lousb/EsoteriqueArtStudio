@@ -39,7 +39,7 @@ export function NavLinks() {
               transition: "opacity 0.2s ease",
             }}
           >
-            <Link
+            {/* <Link
               href={href}
               style={{
                 textDecoration: "none",
@@ -50,7 +50,7 @@ export function NavLinks() {
 
             {i < links.length - 1 && (
               <span style={{ paddingRight: "0.1rem" }}>,</span>
-            )}
+            )} */}
           </span>
         );
       })}
