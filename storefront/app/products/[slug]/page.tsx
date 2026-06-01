@@ -140,7 +140,7 @@ export default async function Page(props: Props) {
 function ProductDescription({ product }: { product: Product }) {
   return (
     <>
-      <div className={s.descriptionTop} style={{paddingTop:'60vh'}}>
+      <div className={s.descriptionTop}>
         <h1>{product.title}</h1>
         {!!product.descriptionHtml && (
           <div
