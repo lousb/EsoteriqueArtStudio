@@ -23,160 +23,113 @@ export function Cart() {
   const closeCart = () => setIsOpen(false);
 
   useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && isOpen) closeCart();
+    };
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => { document.body.style.overflow = ""; };
+  }, [isOpen]);
+
+  useEffect(() => {
     if (cart) saveCart(cart);
   }, [cart]);
 
-  console.log(cart);
-
   return (
     <>
-      {!isOpen ? (
-        <button
-          aria-label="Open cart"
-          onClick={openCart}
-          className={s.cartButton}
-        >
-          <OpenCart quantity={cart?.totalQuantity} />
-        </button>
-      ) : (
-        <button
-          aria-label="Close cart"
-          onClick={closeCart}
-          className={s.cartButton}
-        >
-          <CloseCart />
-        </button>
-      )}
+      <button
+        aria-label={isOpen ? "Close cart" : "Open cart"}
+        onClick={isOpen ? closeCart : openCart}
+        className={s.cartButton}
+      >
+        <span className={s.cartLabel}>
+          {isOpen ? "Close" : <>Cart{cart?.totalQuantity ? <span className={s.cartCount}>{cart.totalQuantity}</span> : null}</>}
+        </span>
+      </button>
+
       {isOpen && (
-         <>
-    {/* Blurred overlay */}
-        <div
-          className={s.overlay}
-          onClick={closeCart}
-          aria-hidden="true"
-        />
-        <aside className={s.cart}>
-          {!cart || cart.lines.length === 0 ? (
-            <div>
-              <p>Your cart is empty.</p>
+        <>
+          <div className={s.overlay} onClick={closeCart} aria-hidden="true" />
+
+          <aside className={s.cart} role="dialog" aria-label="Shopping cart" aria-modal="true">
+            <div className={s.cartHeader}>
+              <span className={s.cartTitle}>
+                {cart?.totalQuantity ? `(${cart.totalQuantity})` : "Cart"}
+              </span>
+              <button className={s.closeButton} onClick={closeCart} aria-label="Close cart">×</button>
             </div>
-          ) : (
-            <div>
-              <ul className="main-grid">
-                {cart.lines
-                  .sort((a, b) =>
-                    a.merchandise.product.title.localeCompare(
-                      b.merchandise.product.title,
-                    ),
-                  )
-                  .map((item, i) => {
-                    const merchandiseSearchParams =
-                      {} as MerchandiseSearchParams;
 
-                    item.merchandise.selectedOptions.forEach(
-                      ({ name, value }) => {
-                        if (value !== DEFAULT_OPTION) {
-                          merchandiseSearchParams[name.toLowerCase()] = value;
-                        }
-                      },
-                    );
+            {!cart || cart.lines.length === 0 ? (
+              <div className={s.emptyState}><p>Your cart is empty.</p></div>
+            ) : (
+              <div className={s.cartBody}>
+                <ul className={s.itemList}>
+                  {cart.lines
+                    .sort((a, b) => a.merchandise.product.title.localeCompare(b.merchandise.product.title))
+                    .map((item, i) => {
+                      const merchandiseSearchParams = {} as MerchandiseSearchParams;
+                      item.merchandise.selectedOptions.forEach(({ name, value }) => {
+                        if (value !== DEFAULT_OPTION) merchandiseSearchParams[name.toLowerCase()] = value;
+                      });
+                      const merchandiseUrl = createUrl(
+                        `/product/${item.merchandise.product.handle}`,
+                        new URLSearchParams(merchandiseSearchParams),
+                      );
+                      const cartImage = item.merchandise.variantImage ?? item.merchandise.product.featuredImage;
 
-                    const merchandiseUrl = createUrl(
-                      `/product/${item.merchandise.product.handle}`,
-                      new URLSearchParams(merchandiseSearchParams),
-                    );
-
-                    const cartImage =
-                      item.merchandise.variantImage ??
-                      item.merchandise.product.featuredImage;
-
-                    return (
-                      <li key={i}>
-                        <div>
-                          <div>
-                            <DeleteItemButton
-                              item={item}
-                              optimisticUpdate={updateCartItem}
+                      return (
+                        <li key={i} className={s.cartItem}>
+                          <Link href={merchandiseUrl} onClick={closeCart} className={s.itemImageLink}>
+                            <Image
+                              width={80} height={80}
+                              alt={cartImage.altText || item.merchandise.product.title}
+                              src={cartImage.url}
+                              className={s.itemImage}
                             />
-                          </div>
-                          <div>
-                            <div>
-                              <Image
-                                width={124}
-                                height={124}
-                                alt={
-                                  cartImage.altText ||
-                                  item.merchandise.product.title
-                                }
-                                src={cartImage.url}
-                              />
-                            </div>
-                            <Link href={merchandiseUrl} onClick={closeCart}>
-                              <div>
-                                <span>{item.merchandise.product.title}</span>
-                                {item.merchandise.title !== DEFAULT_OPTION ? (
-                                  <p>{item.merchandise.title}</p>
-                                ) : null}
-                              </div>
+                          </Link>
+                          <div className={s.itemInfo}>
+                            <Link href={merchandiseUrl} onClick={closeCart} className={s.itemTitle}>
+                              {item.merchandise.product.title}
                             </Link>
+                            {item.merchandise.title !== DEFAULT_OPTION && (
+                              <p className={s.itemVariant}>{item.merchandise.title}</p>
+                            )}
+                            <Price amount={item.cost.totalAmount.amount} currencyCode={item.cost.totalAmount.currencyCode} />
                           </div>
-                          <div>
-                            <p>
-                              <Price
-                                amount={item.cost.totalAmount.amount}
-                                currencyCode={
-                                  item.cost.totalAmount.currencyCode
-                                }
-                              />
-                            </p>
-                            <div className="flex">
-                              <EditItemQuantityButton
-                                item={item}
-                                type="minus"
-                                optimisticUpdate={updateCartItem}
-                              />
-                              <p>
-                                <span>{item.quantity}</span>
-                              </p>
-                              <EditItemQuantityButton
-                                item={item}
-                                type="plus"
-                                optimisticUpdate={updateCartItem}
-                              />
+                          <div className={s.itemControls}>
+                            <div className={s.quantityRow}>
+                              <EditItemQuantityButton item={item} type="minus" optimisticUpdate={updateCartItem} />
+                              <span className={s.quantity}>{item.quantity}</span>
+                              <EditItemQuantityButton item={item} type="plus" optimisticUpdate={updateCartItem} />
                             </div>
+                            <DeleteItemButton item={item} optimisticUpdate={updateCartItem} />
                           </div>
-                        </div>
-                      </li>
-                    );
-                  })}
-              </ul>
-              <div className="total-checkout">
-                <div>
-                  <div>
-                    <p>Shipping calculated at checkout</p>
+                        </li>
+                      );
+                    })}
+                </ul>
+
+                <div className={s.cartFooter}>
+                  <div className={s.totalRow}>
+                    <span>Total</span>
+                    <Price amount={cart.cost.totalAmount.amount} currencyCode={cart.cost.totalAmount.currencyCode} />
                   </div>
-                  <div>
-                    <p>Total</p>
-                    <p>
-                      <Price
-                        amount={cart.cost.totalAmount.amount}
-                        currencyCode={cart.cost.totalAmount.currencyCode}
-                      />
-                    </p>
-                  </div>
+                  <p className={s.shippingNote}>Shipping calculated at checkout</p>
+                  <form action={() => { redirectToCheckout(cart); }}>
+                    <CheckoutButton />
+                  </form>
                 </div>
-                <form
-                  action={() => {
-                    redirectToCheckout(cart);
-                  }}
-                  className="block-space"
-                >
-                  <CheckoutButton />
-                </form>
               </div>
-            </div>
-          )}
-        </aside>
+            )}
+          </aside>
         </>
       )}
     </>
@@ -185,83 +138,30 @@ export function Cart() {
 
 function CheckoutButton() {
   const { pending } = useFormStatus();
-
   return (
-    <button type="submit" disabled={pending}>
-      {pending ? "..." : "Proceed to Checkout"}
+    <button type="submit" disabled={pending} className={s.checkoutButton} data-pending={pending}>
+      {pending ? "Redirecting…" : "Proceed to Checkout"}
     </button>
   );
 }
 
-function OpenCart({ quantity }: { quantity?: number }) {
+function DeleteItemButton({ item, optimisticUpdate }: { item: CartItem; optimisticUpdate: any }) {
   return (
-    <div>
-      {"Cart "}
-      {quantity ? <> {quantity}</> : null}
-    </div>
+    <form action={() => { optimisticUpdate(item.merchandise.id, "delete"); }}>
+      <button type="submit" aria-label="Remove cart item" className={s.removeButton}>Remove</button>
+    </form>
   );
 }
 
-function CloseCart() {
-  return <div className="color-black">Close</div>;
-}
-
-function DeleteItemButton({
-  item,
-  optimisticUpdate,
-}: {
-  item: CartItem;
-  optimisticUpdate: any;
-}) {
+function EditItemQuantityButton({ item, type, optimisticUpdate }: { item: CartItem; type: "plus" | "minus"; optimisticUpdate: any }) {
   const merchandiseId = item.merchandise.id;
-
+  const quantity = type === "plus" ? item.quantity + 1 : item.quantity - 1;
+  const label = type === "plus" ? "Increase item quantity" : "Reduce item quantity";
   return (
-    <form
-      action={() => {
-        optimisticUpdate(merchandiseId, "delete");
-      }}
-    >
-      <button type="submit" aria-label="Remove cart item">
-        ×
+    <form action={() => { optimisticUpdate(merchandiseId, type); }}>
+      <button type="submit" aria-label={label} className={s.qtyButton}>
+        {type === "plus" ? "+" : "−"}
       </button>
     </form>
-  );
-}
-
-function EditItemQuantityButton({
-  item,
-  type,
-  optimisticUpdate,
-}: {
-  item: CartItem;
-  type: "plus" | "minus";
-  optimisticUpdate: any;
-}) {
-  const payload = {
-    merchandiseId: item.merchandise.id,
-    quantity: type === "plus" ? item.quantity + 1 : item.quantity - 1,
-  };
-
-  return (
-    <form
-      action={() => {
-        optimisticUpdate(payload.merchandiseId, type);
-      }}
-    >
-      <SubmitButton type={type} />
-    </form>
-  );
-}
-
-function SubmitButton({ type }: { type: "plus" | "minus" }) {
-  return (
-    <button
-      type="submit"
-      aria-label={
-        type === "plus" ? "Increase item quantity" : "Reduce item quantity"
-      }
-    >
-      {type === "plus" ? "+" : "−"}
-    </button>
   );
 }
