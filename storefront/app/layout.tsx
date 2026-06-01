@@ -143,7 +143,7 @@ export async function Footer() {
   return (
     <footer className={s.footer}>
       <div>
-        <h5 className={s.aoc}>I respectfully acknowledge the Gadigal people of the Eora Nation as the Traditional Custodians of the land I work on. Sydney, Australia.</h5>
+        <h5 className={s.aoc}>Respectfully acknowledging the Gadigal people of the Eora Nation as the Traditional Custodians of the land we work on. Sydney, Australia.</h5>
       </div>
       <ul role="list">
         {footer?.links?.map((link) => {

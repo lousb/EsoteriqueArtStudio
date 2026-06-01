@@ -18,7 +18,7 @@ const saveCart = (cart: Cart) => {
 export async function createCart(): Promise<Cart> {
   const newCart: Cart = {
     id: "local-cart",
-    checkoutUrl: `https://${process.env.NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN}/cart/`,
+    checkoutUrl: `https://checkout.esoterique.com.au/cart/`,
     totalQuantity: 0,
     lines: [],
     cost: {

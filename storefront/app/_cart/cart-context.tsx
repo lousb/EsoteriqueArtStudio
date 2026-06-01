@@ -122,10 +122,10 @@ function updateCartTotals(
 }
 
 function createEmptyCart(): Cart {
-  console.log('DOMAIN:', process.env.NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN);
+
   return {
     id: CART_STORAGE_KEY,
-    checkoutUrl: `https://${process.env.NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN}/cart/`,
+    checkoutUrl: `https://checkout.esoterique.com.au/cart/`,
     totalQuantity: 0,
     lines: [],
     cost: {
