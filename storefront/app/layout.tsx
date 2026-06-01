@@ -142,10 +142,13 @@ export async function Footer() {
 
   return (
     <footer className={s.footer}>
+      <h4>
+        Esoterique Art Studio, A quiet contemporary conversation, creating high-quality, low-quantity fine items.
+      </h4>
       <div>
-        <h5 className={s.aoc}>Respectfully acknowledging the Gadigal people of the Eora Nation as the Traditional Custodians of the land we work on. Sydney, Australia.</h5>
+        <h4 className={s.aoc}>Respectfully acknowledging the Gadigal people of the Eora Nation as the Traditional Custodians of the land we work on. Sydney, Australia.</h4>
       </div>
-      <ul role="list">
+      {/* <ul role="list">
         {footer?.links?.map((link) => {
           return (
             <li key={link._key}>
@@ -154,7 +157,7 @@ export async function Footer() {
           );
         })}
       </ul>
-      <Newsletter />
+      <Newsletter /> */}
     </footer>
   );
 }
