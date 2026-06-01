@@ -51,7 +51,7 @@ export function ProductBlock({ product }: ProductBlockProps) {
   const dotsRef = useRef<HTMLDivElement>(null);
 
   const [emblaRef, emblaApi] = useEmblaCarousel({
-    loop: false,
+    loop: true,
     dragFree: false,
   });
 
