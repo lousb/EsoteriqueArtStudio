@@ -22,7 +22,7 @@
   height: calc(100vh - 120px);
   padding-block-start: calc(var(--main-padding) * 2);
   display: flex;
-  justify-content: space-between;
+  justify-content: end;
   flex-direction: column;
   padding-inline: var(--main-padding);
 }
@@ -114,10 +114,7 @@
   }
 }
 
-.descriptionTop {
-  padding-top: 60vh;
- 
-}
+
 .descriptionTop h1{
   padding-bottom:0.4em;
 }

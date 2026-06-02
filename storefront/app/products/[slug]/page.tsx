@@ -133,7 +133,7 @@ function ProductDescription({
   relatedProducts: Product[];
 }) {
   return (
-    <>
+    <div className={s.description}>
       <div className={s.descriptionTop}>
         <h1>{product.title}</h1>
         {!!product.descriptionHtml && (
@@ -168,6 +168,6 @@ function ProductDescription({
 )}
 
       
-    </>
+    </div>
   );
 }

@@ -100,7 +100,7 @@ export function AddToCart({ product }: { product: Product }) {
               transition: "transform 0.25s ease",
             }}
           >
-            {!availableForSale ? "Unavailable" : !selectedVariantId ? "Select option" : "Add to Cart"}
+            {!availableForSale ? "Sold Out" : !selectedVariantId ? "Select option" : "Add to Cart"}
           </span>
           
         </span>
