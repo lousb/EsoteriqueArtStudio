@@ -28,7 +28,10 @@
   color: black;
   display: flex;
   justify-content: space-between;
+  gap: var(--main-gap);
+
   padding: var(--main-padding);
+    padding-block: 40px !important;
   @media (max-width: 768px) {
     flex-direction: column;
   }
