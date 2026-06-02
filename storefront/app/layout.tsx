@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { VisualEditing } from "next-sanity";
 import { draftMode } from "next/headers";
 import { Toaster } from "sonner";
+import { Analytics } from "@vercel/analytics/next"
 
 import { DraftModeToast } from "./draft-mode-toast";
 
@@ -112,6 +113,7 @@ export default async function RootLayout({
          
           <Footer />
         </CartProvider>
+        <Analytics />
       </body>
     </html>
     </ViewTransitions>
