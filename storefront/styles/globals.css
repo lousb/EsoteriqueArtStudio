@@ -122,9 +122,18 @@ body{
   }
 }
 
-@media (max-width: 768px) {
+@media only screen and (max-width: 768px) {
   [data-image-block-container] {
     aspect-ratio: 0.7 !important;
+  }
+  .add-to-cart{
+    position: fixed !important;
+    bottom: 10px;
+    left: 10px;
+    z-index: 9999;
+    width: calc(100% - 20px) !important;
+    margin-block: 0px !important;
+    padding: 20px !important;
   }
 }
 

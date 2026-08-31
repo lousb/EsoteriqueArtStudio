@@ -45,6 +45,8 @@ export function AddToCart({ product }: { product: Product }) {
   return (
     <form action={handleAdd}>
       <button
+
+        className="add-to-cart"
         type="submit"
         disabled={disabled}
         aria-label={label}
