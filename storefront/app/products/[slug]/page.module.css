@@ -115,8 +115,8 @@
 }
 
 
-.descriptionTop h1{
-  padding-bottom:0.4em;
+.descriptionTop p{
+  opacity: 0.6;
 }
 
 @media (max-width: 768px) {

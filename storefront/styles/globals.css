@@ -25,6 +25,12 @@
   }
 }
 
+
+*{
+  font-size: 12px !important;
+}
+
+
 ::view-transition-old(root) {
   animation: 400ms ease both slide-out;
 }
