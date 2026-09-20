@@ -36,6 +36,22 @@ export const product = defineType({
       options: { field: "store.slug.current" },
     }),
     defineField({
+      name: "colourway",
+      title: "Colourway",
+      type: "string",
+      group: "editorial",
+      description: 'Shown under the title on the product page, for example "Black on Black".',
+    }),
+    defineField({
+      name: "productType",
+      title: "Product type",
+      type: "reference",
+      to: [{ type: "productType" }],
+      group: "editorial",
+      description:
+        "Categorises the product. Its excerpt is shown under the price on the product page.",
+    }),
+    defineField({
       name: "overwriteDefaultInformationFields",
       type: "string",
       group: "editorial",

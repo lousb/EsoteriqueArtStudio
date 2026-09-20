@@ -1,10 +1,8 @@
 import type { Metadata, ResolvingMetadata } from "next";
 import { notFound } from "next/navigation";
 
-import { Link } from 'next-view-transitions'
 import { Suspense } from "react";
 import { PageBuilder } from "../../../components/page-builder";
-import Price from "../../../components/price";
 import { sanityFetch } from "../../../data/sanity";
 
 import {
@@ -13,13 +11,13 @@ import {
   PRODUCT_QUERY,
 } from "../../../data/sanity/queries";
 import { getProduct, getProducts, getProductRecommendations } from "../../../data/shopify";
+import { getStoreProduct, getStoreProducts, isShopifyConfigured } from "../../../data/sanity/store-product";
 import { resolveOpenGraphImage } from "../../../sanity/utils";
-import { Product } from "../../../shopify/types";
-import { AddToCart } from "../../_cart/add-to-cart";
 import s from "./page.module.css";
 import { ProductProvider } from "./product-context";
 import { Gallery } from "./gallery";
-import { ProductImage } from "./product-image";
+import { ProductDetails } from "./product-details";
+import { getShipping } from "../../../data/shipping";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -64,18 +62,33 @@ export default async function Page(props: Props) {
     params,
   });
 
-  const product = await getProduct({ handle: params.slug, tags });
+  // Use live Shopify data when the Storefront API is configured; otherwise fall back to
+  // the product data Sanity Connect already syncs into Sanity.
+  const useShopify = isShopifyConfigured();
+  const product = useShopify
+    ? await getProduct({ handle: params.slug, tags })
+    : await getStoreProduct(params.slug);
 
   if (!product?.id) {
     return notFound();
   }
 
-const allProducts = await getProducts({ sortKey: "TITLE", reverse: false, query: "" });
+const allProducts = useShopify
+  ? await getProducts({ sortKey: "TITLE", reverse: false, query: "" })
+  : await getStoreProducts();
 const otherProducts = allProducts.filter(p => p.id !== product.id);
 const seed = product.id.split("").reduce((acc, c) => acc + c.charCodeAt(0), 0);
 const relatedProducts = [0, 1, 2].map(i => otherProducts[(seed + i) % otherProducts.length]).filter(Boolean);
 
 console.log("relatedProducts", relatedProducts.length);
+
+  const shipping = await getShipping();
+
+  // Cast keeps this compiling until types are regenerated from the new schema.
+  const extra = productPage as unknown as {
+    colourway?: string | null;
+    productType?: { title?: string | null; excerpt?: string | null } | null;
+  } | null;
 
   const productJsonLd = {
     "@context": "https://schema.org",
@@ -104,7 +117,7 @@ console.log("relatedProducts", relatedProducts.length);
       />
       <ProductProvider>
         <div>
-          <div className={s.page}>
+          <div className={s.page} data-product-page>
             <div className={s.gallery}>
               <Gallery
                 variants={product.variants}
@@ -113,7 +126,13 @@ console.log("relatedProducts", relatedProducts.length);
               />
             </div>
             <div className={s.productDetails}>
-              <ProductDescription product={product} relatedProducts={relatedProducts} />
+              <ProductDetails
+                product={product}
+                colourway={extra?.colourway}
+                excerpt={extra?.productType?.excerpt}
+                relatedProducts={relatedProducts}
+                shipping={shipping}
+              />
             </div>
           </div>
           {!!productPage?.pageBuilder?.length && (
@@ -122,52 +141,5 @@ console.log("relatedProducts", relatedProducts.length);
         </div>
       </ProductProvider>
     </Suspense>
-  );
-}
-
-function ProductDescription({
-  product,
-  relatedProducts,
-}: {
-  product: Product;
-  relatedProducts: Product[];
-}) {
-  return (
-    <div className={s.description}>
-      <div className={s.descriptionTop}>
-        <h1>{product.title}</h1>
-        {!!product.descriptionHtml && (
-          <div
-            dangerouslySetInnerHTML={{
-              __html: product.descriptionHtml ?? "",
-            }}
-          />
-        )}
-      </div>
-
-      <div style={{ width: "300px" }}>
-        <AddToCart product={product} />
-        {/* svg */}
-      </div>
-
-      {relatedProducts.length > 0 && (
-  <div style={{ display: "flex", gap: "1em", flexWrap: "nowrap", width: "100%" }} className="related-products">
-    {relatedProducts.slice(0, 3).map((related) => (
-      <Link key={related.handle} href={`/products/${related.handle}`} prefetch={true} style={{ flex: "1 1 0", minWidth: 0 }}>
-        <div className="product-card">
-          <ProductImage
-            shopifyImage={related.featuredImage}
-            objectFit="cover"
-            sizes="(min-width: 1024px) 20vw, (min-width: 768px) 25vw, (min-width: 640px) 33vw, (min-width: 475px) 50vw, 100vw"
-          />
-        </div>
-        <h3>{related.title}</h3>
-      </Link>
-    ))}
-  </div>
-)}
-
-      
-    </div>
   );
 }

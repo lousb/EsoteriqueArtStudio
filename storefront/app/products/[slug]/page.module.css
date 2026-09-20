@@ -1,6 +1,7 @@
 .page {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  /* Gallery about 55% of the width, details column in the remaining 45% */
+  grid-template-columns: minmax(0, 55fr) minmax(0, 45fr);
   gap: var(--main-gap);
   place-content: center;
   place-items: start;
@@ -14,17 +15,18 @@
 }
 
 .productDetails {
-  width: 50%;
-  margin-left: 50% !important;
-  max-width: 300px;
+  /* Inset from the gallery, sits flush to the right, top aligned and sticky */
+  width: 85%;
+  margin-left: 15% !important;
+  max-width: none;
   position: sticky;
-  top: 60px;
-  height: calc(100vh - 120px);
-  padding-block-start: calc(var(--main-padding) * 2);
-  display: flex;
-  justify-content: end;
-  flex-direction: column;
-  padding-inline: var(--main-padding);
+  /* Same distance from the top as the gallery starts at, so the column
+     does not creep upward when it starts to pin. */
+  top: 44px;
+  align-self: start;
+  height: auto;
+  padding: 0;
+  display: block;
 }
 
 .line {
@@ -91,6 +93,10 @@
   .page {
     grid-template-columns: 1fr;
     padding: 0;
+    /* Room at the end of the page for the add to cart button to rest in
+       once GSAP releases it, so it never covers the related products. */
+    padding-bottom: 80px;
+    position: relative;
     gap: 0;
   }
 

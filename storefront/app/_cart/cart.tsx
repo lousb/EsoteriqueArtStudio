@@ -5,6 +5,7 @@ import { Link } from 'next-view-transitions'
 import { useEffect, useState } from "react";
 import { useFormStatus } from "react-dom";
 import Price from "../../components/price";
+import { useCurrency } from "../../components/currency-provider";
 import { DEFAULT_OPTION } from "../../shopify/constants";
 import { CartItem } from "../../shopify/types";
 import { createUrl } from "../../shopify/utils";
@@ -18,6 +19,7 @@ type MerchandiseSearchParams = {
 
 export function Cart() {
   const { cart, updateCartItem } = useCart();
+  const { isConverted, currency } = useCurrency();
   const [isOpen, setIsOpen] = useState(false);
   const openCart = () => setIsOpen(true);
   const closeCart = () => setIsOpen(false);
@@ -123,6 +125,11 @@ export function Cart() {
                     <Price amount={cart.cost.totalAmount.amount} currencyCode={cart.cost.totalAmount.currencyCode} />
                   </div>
                   <p className={s.shippingNote}>Shipping calculated at checkout</p>
+                  {isConverted && (
+                    <p className={s.shippingNote}>
+                      Prices shown in {currency} are approximate. Checkout is charged in AUD.
+                    </p>
+                  )}
                   <form action={() => { redirectToCheckout(cart); }}>
                     <CheckoutButton />
                   </form>

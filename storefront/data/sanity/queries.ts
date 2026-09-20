@@ -111,8 +111,44 @@ export const SETTINGS_QUERY = defineQuery(`
     },
     footer{
       _type,
+      shopLabel,
+      exploreTitle,
+      "exploreLinks": exploreLinks[]{_key, label, href},
+      customerServiceTitle,
+      "customerServiceLinks": customerServiceLinks[]{_key, label, href},
+      acknowledgement,
+      legalName,
       "links": links[]{${linkFields}}
     },
+    contact{
+      email,
+      phone,
+      instagramUrl,
+      instagramHandle,
+      address,
+      "hours": hours[]{_key, days, hours},
+      note,
+      formEnabled,
+      formRecipient,
+      formSubjects,
+      formIntro,
+      formSuccessMessage
+    },
+    shipping{
+      selectorLabel,
+      "regions": regions[]{_key, name, lines}
+    },
+  }`);
+
+export const POLICY_PAGE_QUERY = defineQuery(`
+  *[_type == "policyPage" && slug.current == $slug && section == $section][0]{
+    _id,
+    _type,
+    title,
+    lastUpdated,
+    "slug": slug.current,
+    section,
+    body
   }`);
 
 export const HOME_QUERY = defineQuery(`
@@ -213,6 +249,8 @@ export const PRODUCT_QUERY = defineQuery(`
     _id,
     _updatedAt,
     _createdAt,
+    colourway,
+    "productType": productType->{title, excerpt},
     overwriteDefaultInformationFields,
     "defaultProductInformation": *[ _type == 'settings'][0].defaultProductInformation,
     productInformation,
@@ -374,4 +412,46 @@ export const POST_QUERY = defineQuery(`
 export const ALL_POST_SLUGS = defineQuery(`
   *[_type == "post" && defined(slug.current)]
   {"slug": slug.current}
+`);
+
+// Product data as synced from Shopify by Sanity Connect. Used to render the
+// product page without the Shopify Storefront API (see data/sanity/store-product.ts).
+const storeProductFields = /* groq */ `
+  "store": store {
+    title,
+    gid,
+    "handle": slug.current,
+    descriptionHtml,
+    priceRange,
+    previewImageUrl,
+    options,
+    tags,
+    updatedAt
+  },
+  "variants": store.variants[]-> {
+    "store": store {
+      title,
+      gid,
+      price,
+      option1,
+      option2,
+      option3,
+      previewImageUrl,
+      inventory,
+      status,
+      isDeleted
+    }
+  }
+`;
+
+export const STORE_PRODUCT_QUERY = defineQuery(`
+  *[_type == "product" && store.slug.current == $slug && store.status == "active" && store.isDeleted != true][0] {
+    ${storeProductFields}
+  }
+`);
+
+export const ALL_STORE_PRODUCTS_QUERY = defineQuery(`
+  *[_type == "product" && defined(store.slug.current) && store.status == "active" && store.isDeleted != true] | order(store.title asc) {
+    ${storeProductFields}
+  }
 `);

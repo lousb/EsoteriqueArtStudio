@@ -128,11 +128,43 @@ body{
   }
 }
 
+/* Add to cart. Desktop: full width, square, black, label on the left.
+   Mobile (below): pinned to the bottom of the screen with the price on the left. */
+.add-to-cart {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+  margin: 0;
+  padding: 9px 0.85rem;
+  position: relative;
+  overflow: hidden;
+  background: #000;
+  color: #fff;
+  border: 0;
+  border-radius: 0;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.add-to-cart:disabled {
+  background: #888;
+  cursor: not-allowed;
+}
+
+.add-to-cart__price,
+.add-to-cart__label-mobile {
+  display: none;
+}
+
 @media only screen and (max-width: 768px) {
   [data-image-block-container] {
     aspect-ratio: 0.7 !important;
   }
   .add-to-cart{
+    justify-content: space-between;
+    border-radius: 4px;
     position: fixed !important;
     bottom: 10px;
     left: 10px;
@@ -140,6 +172,22 @@ body{
     width: calc(100% - 20px) !important;
     margin-block: 0px !important;
     padding: 20px !important;
+  }
+  .add-to-cart__price {
+    display: inline-block;
+  }
+  .add-to-cart__label-desktop {
+    display: none;
+  }
+  .add-to-cart__label-mobile {
+    display: inline;
+  }
+  /* Set by GSAP once the end of the product page reaches the bottom of the
+     screen. Sits at the same spot as the fixed button, then scrolls with the page. */
+  .add-to-cart.is-docked{
+    position: absolute !important;
+    left: var(--dock-left, 10px);
+    width: var(--dock-width, calc(100% - 20px)) !important;
   }
 }
 

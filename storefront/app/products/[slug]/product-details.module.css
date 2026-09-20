@@ -1,0 +1,157 @@
+/* Product details column. Vertical spacing follows the design, in em. */
+
+.details {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.titleBlock,
+.priceBlock {
+  line-height: 1.2;
+}
+
+.title,
+.heading {
+  margin: 0;
+  font-weight: inherit;
+  color: var(--color-text-muted, #878580);
+}
+
+.colourway {
+  margin: 0;
+  color: #ababab;
+}
+
+.cart {
+  margin-top: 1em;
+}
+
+.priceBlock {
+  margin-top: 1em;
+}
+
+.priceBlock p {
+  margin: 0;
+}
+
+.payLater {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+}
+
+.afterpay {
+  display: block;
+  height: 1.3em;
+  width: auto;
+  flex: none;
+}
+
+.excerpt {
+  margin: 1em 0 0;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.shipping {
+  margin-top: 4em;
+}
+
+.info {
+  margin-top: 3em;
+}
+
+.returns {
+  margin-top: 3em;
+}
+
+.related {
+  margin-top: 3em;
+}
+
+.section > .heading + * {
+  margin-top: 0.8em;
+}
+
+.copy {
+  margin: 0;
+  max-width: max(56%, 300px);
+  line-height: 1.3;
+}
+
+.copy p {
+  margin: 0;
+}
+
+.copy p + p {
+  margin-top: 0.6em;
+}
+
+.section > .copy + .link,
+.section > .copy + div {
+  margin-top: 0.8em;
+}
+
+/* Blue underlined text links */
+.link {
+  display: inline-flex;
+  align-items: baseline;
+  align-self: flex-start;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  letter-spacing: inherit;
+  color: #0a68f5;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.underline {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+.caret {
+  margin-left: 0.5em;
+  font-size: 0.95em !important;
+}
+
+/* Related products: small square thumbnails, no captions */
+.thumbs {
+  display: grid;
+  grid-template-columns: repeat(3, 18.6%);
+  gap: 1.9%;
+  width: 100%;
+}
+
+.thumb {
+  position: relative;
+  display: block;
+  aspect-ratio: 1;
+  background: #f1f1f1;
+  overflow: hidden;
+}
+
+.thumb img {
+  mix-blend-mode: multiply;
+  /* Product photos leave a lot of empty space, so fill the tile a bit more */
+  transform: scale(1.3);
+}
+
+@media (max-width: 768px) {
+  .copy {
+    max-width: none;
+  }
+
+  .thumbs {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+  }
+}

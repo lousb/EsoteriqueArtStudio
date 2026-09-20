@@ -48,7 +48,6 @@ export function ProductBlock({ product }: ProductBlockProps) {
   const isMobile = useIsMobile();
 
   const containerRef = useRef<HTMLDivElement>(null);
-  const dotsRef = useRef<HTMLDivElement>(null);
 
   const [emblaRef, emblaApi] = useEmblaCarousel({
     loop: true,
@@ -78,46 +77,6 @@ export function ProductBlock({ product }: ProductBlockProps) {
 
   const showCarousel = isMobile && slides.length > 1;
 
-  // ✅ PERFECT DOT PINNING
-  useEffect(() => {
-    if (!isMobile || !containerRef.current || !dotsRef.current) return;
-
-    const container = containerRef.current;
-    const dots = dotsRef.current;
-
-    const OFFSET =
-      parseFloat(getComputedStyle(document.documentElement).fontSize) * 0.75;
-
-    const st = ScrollTrigger.create({
-      trigger: container,
-      start: "top bottom",
-      end: "bottom bottom",
-
-      onUpdate: () => {
-        const rect = container.getBoundingClientRect();
-        const viewportH = window.innerHeight;
-
-        let y = -OFFSET; // ✅ base position (0.75rem above card)
-
-        // pin to viewport bottom (with same offset)
-        if (rect.bottom > viewportH) {
-          y = viewportH - rect.bottom - OFFSET;
-        }
-
-        // clamp so it NEVER drops below base position
-        if (y > -OFFSET) y = -OFFSET;
-
-        gsap.set(dots, {
-          y,
-          overwrite: true,
-          force3D: true,
-        });
-      },
-    });
-
-    return () => st.kill();
-  }, [isMobile]);
-
   return (
     <NextLink href={`/products/${product.slug}`} className="product-block">
       <figure ref={containerRef} className="product-card">
@@ -125,7 +84,9 @@ export function ProductBlock({ product }: ProductBlockProps) {
           <div
             ref={emblaRef}
             style={{
-              overflow: "hidden",
+              // "clip" (not "hidden") so the dots inside can stick to the
+              // viewport. It does not create a scroll container.
+              overflow: "clip",
               position: "absolute",
               inset: 0,
             }}
@@ -183,33 +144,44 @@ export function ProductBlock({ product }: ProductBlockProps) {
               )}
             </div>
 
-            {/* ✅ DOTS */}
+            {/* Dots. Pinned to the bottom of the visible part of the card with
+                position: sticky, so they move with the native scroll exactly,
+                Lenis included, with no JavaScript involved. */}
             <div
-              ref={dotsRef}
               style={{
                 position: "absolute",
-                bottom: 0,
-                left: "50%",
-                transform: "translate(-50%, 0)",
+                inset: 0,
                 display: "flex",
-                gap: "0.35rem",
+                flexDirection: "column",
+                justifyContent: "flex-end",
+                alignItems: "center",
+                paddingBottom: "0.75rem",
                 zIndex: 4,
                 pointerEvents: "none",
               }}
             >
-              {slides.map((_, i) => (
-                <div
-                  key={i}
-                  style={{
-                    width: "5px",
-                    height: "5px",
-                    borderRadius: "50%",
-                    background: "white",
-                    opacity: i === current ? 1 : 0.3,
-                    transition: "opacity 0.25s ease",
-                  }}
-                />
-              ))}
+              <div
+                style={{
+                  position: "sticky",
+                  bottom: "0.75rem",
+                  display: "flex",
+                  gap: "0.35rem",
+                }}
+              >
+                {slides.map((_, i) => (
+                  <div
+                    key={i}
+                    style={{
+                      width: "5px",
+                      height: "5px",
+                      borderRadius: "50%",
+                      background: "white",
+                      opacity: i === current ? 1 : 0.3,
+                      transition: "opacity 0.25s ease",
+                    }}
+                  />
+                ))}
+              </div>
             </div>
           </div>
         ) : (
@@ -268,6 +240,7 @@ export function ProductBlock({ product }: ProductBlockProps) {
         .product-card {
           position: relative;
           overflow: hidden;
+          overflow: clip;
         }
 
         .product-block__primary,

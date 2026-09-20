@@ -28,6 +28,16 @@ export const settings = defineType({
       validation: (rule) => rule.required(),
     }),
     defineField({
+      name: "contact",
+      title: "Contact details and form",
+      type: "contactSettings",
+    }),
+    defineField({
+      name: "shipping",
+      title: "Shipping options",
+      type: "shippingSettings",
+    }),
+    defineField({
       name: "defaultProductInformation",
       description: "These fields show on every product page unless overwritten",
       type: "array",

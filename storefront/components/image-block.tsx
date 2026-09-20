@@ -28,7 +28,6 @@ export function ImageBlock({ items, title, description }: ImageBlockProps) {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
   const innerRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const dotsRef = useRef<HTMLDivElement>(null);
 
   const pointerStartX = useRef(0);
   const pointerStartY = useRef(0);
@@ -78,33 +77,12 @@ export function ImageBlock({ items, title, description }: ImageBlockProps) {
     return () => st.kill();
   }, [n]);
 
-  // Dots landing animation
-  useEffect(() => {
-    if (!isCarousel || !containerRef.current || !dotsRef.current) return;
-    const container = containerRef.current;
-    const dots = dotsRef.current;
-    const st = ScrollTrigger.create({
-      trigger: container,
-      start: "top bottom",
-      end: "bottom bottom",
-      onUpdate: () => {
-        const rect = container.getBoundingClientRect();
-        const viewportH = window.innerHeight;
-        let y = 0;
-        if (rect.bottom > viewportH) y = viewportH - rect.bottom;
-        if (y > 0) y = 0;
-        gsap.set(dots, { y, overwrite: true });
-      },
-    });
-    return () => st.kill();
-  }, [isCarousel]);
-
   return (
     <div style={{ width: "100%", height: "100%" }}>
       <div
         ref={containerRef}
         data-image-block-container
-        style={{ position: "relative", width: "100%", aspectRatio: "3/4", overflow: "hidden" }}
+        style={{ position: "relative", width: "100%", aspectRatio: "3/4", overflow: "clip" }}
       >
         {/* Embla viewport — owns ALL pointer events, tap detection piggybacks here */}
         <div
@@ -148,34 +126,45 @@ export function ImageBlock({ items, title, description }: ImageBlockProps) {
           </div>
         </div>
 
-        {/* Dots */}
+        {/* Dots. Pinned to the bottom of the visible part of the block with
+            position: sticky, so they move with the native scroll exactly,
+            Lenis included, with no JavaScript involved. */}
         {isCarousel && (
           <div
-            ref={dotsRef}
             style={{
               position: "absolute",
-              bottom: "0.75rem",
-              left: "50%",
-              transform: "translateX(-50%)",
+              inset: 0,
               display: "flex",
-              gap: "0.35rem",
+              flexDirection: "column",
+              justifyContent: "flex-end",
+              alignItems: "center",
+              paddingBottom: "0.75rem",
               zIndex: 4,
               pointerEvents: "none",
             }}
           >
-            {items.map((_, i) => (
-              <div
-                key={i}
-                style={{
-                  width: "5px",
-                  height: "5px",
-                  borderRadius: "50%",
-                  background: "white",
-                  opacity: i === selectedIndex ? 1 : 0.3,
-                  transition: "opacity 0.25s ease",
-                }}
-              />
-            ))}
+            <div
+              style={{
+                position: "sticky",
+                bottom: "0.75rem",
+                display: "flex",
+                gap: "0.35rem",
+              }}
+            >
+              {items.map((_, i) => (
+                <div
+                  key={i}
+                  style={{
+                    width: "5px",
+                    height: "5px",
+                    borderRadius: "50%",
+                    background: "white",
+                    opacity: i === selectedIndex ? 1 : 0.3,
+                    transition: "opacity 0.25s ease",
+                  }}
+                />
+              ))}
+            </div>
           </div>
         )}
       </div>

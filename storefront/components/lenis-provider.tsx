@@ -1,9 +1,13 @@
 "use client";
 
 import Lenis from "lenis";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useEffect, useRef } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import { PropsWithChildren } from "react";
+
+gsap.registerPlugin(ScrollTrigger);
 
 const LenisProvider = ({ children }: PropsWithChildren) => {
   const pathname = usePathname();
@@ -25,14 +29,20 @@ const LenisProvider = ({ children }: PropsWithChildren) => {
 
     lenisRef.current = lenis;
 
-    const raf = (time: number) => {
-      lenis.raf(time);
-      requestAnimationFrame(raf);
-    };
+    // Drive Lenis from GSAP's ticker and update ScrollTrigger inside the same
+    // frame Lenis moves the page. Without this, ScrollTrigger only reacts to
+    // the browser's scroll event on the next frame, so anything positioned
+    // from it (carousel dots, pinned elements) trails the smoothed scroll.
+    const onScroll = () => ScrollTrigger.update();
+    lenis.on("scroll", onScroll);
 
-    requestAnimationFrame(raf);
+    const tick = (time: number) => lenis.raf(time * 1000);
+    gsap.ticker.add(tick);
+    gsap.ticker.lagSmoothing(0);
 
     return () => {
+      gsap.ticker.remove(tick);
+      lenis.off("scroll", onScroll);
       lenis.destroy();
     };
   }, [isStudio]);

@@ -1,5 +1,8 @@
 import { collection } from "./documents/collection";
+import { contactSubmission } from "./documents/contact-submission";
 import { page } from "./documents/page";
+import { policyPage } from "./documents/policy-page";
+import { productType } from "./documents/product-type";
 import { post } from "./documents/post";
 import { product } from "./documents/product";
 import { productVariant } from "./documents/product-variant";
@@ -18,10 +21,13 @@ import { productBlock } from "./objects/editorial/product-block";
 import { productInformation } from "./objects/editorial/product-information";
 
 import { announcementBar } from "./objects/global/announcement-bar";
+import { contactSettings } from "./objects/global/contact-settings";
 import { footer } from "./objects/global/footer";
+import { footerLink } from "./objects/global/footer-link";
 import { header } from "./objects/global/header";
 import { link } from "./objects/global/link";
 import { pageSeo } from "./objects/global/page-seo";
+import { shippingSettings } from "./objects/global/shipping-settings";
 
 import { inventory } from "./objects/shopify/inventory";
 import { option } from "./objects/shopify/option";
@@ -47,9 +53,12 @@ export const schemaTypes = [
   archive,
   // Documents
   collection,
+  contactSubmission,
   page,
+  policyPage,
   post,
   product,
+  productType,
   productVariant,
   // Objects — Editorial
   blockContent,
@@ -66,7 +75,10 @@ export const schemaTypes = [
   productInformation,
   // Objects — Global
   announcementBar,
+  contactSettings,
+  shippingSettings,
   footer,
+  footerLink,
   header,
   link,
   pageSeo,

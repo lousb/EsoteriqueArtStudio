@@ -1,0 +1,63 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+}
+
+.trigger {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.55em;
+  padding: 0 0 2px;
+  border: 0;
+  border-bottom: 1px solid currentColor;
+  background: none;
+  font: inherit;
+  letter-spacing: inherit;
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+.caret {
+  font-size: 0.6em !important;
+  line-height: 1;
+  transform: translateY(-0.08em);
+}
+
+.list {
+  list-style: none;
+  margin: 1em 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55em;
+}
+
+.option {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  letter-spacing: inherit;
+  color: #c4c4c4;
+  cursor: pointer;
+  text-align: left;
+  transition: color 0.15s ease;
+}
+
+.option:hover,
+.option:focus-visible,
+.active {
+  color: inherit;
+}
+
+.details {
+  margin-top: 1em;
+  line-height: 1.4;
+}
+
+.details p {
+  margin: 0;
+}

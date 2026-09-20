@@ -1,0 +1,276 @@
+/* Layout for Customer Service pages on the site's 18 column grid.
+   Title sits in columns 1 to 6, content starts at column 7. */
+
+.page {
+  display: grid;
+  grid-template-columns: repeat(18, minmax(0, 1fr));
+  column-gap: var(--main-gap);
+  padding: 80px var(--main-padding) 40px;
+  align-items: start;
+}
+
+.aside {
+  grid-column: 1 / span 6;
+  min-width: 0;
+}
+
+.content {
+  grid-column: 7 / span 8;
+  min-width: 0;
+}
+
+.contentWide {
+  grid-column: 7 / span 10;
+  min-width: 0;
+}
+
+.title {
+  margin: 0;
+  font-weight: inherit;
+}
+
+.meta {
+  margin: 8px 0 0;
+  color: var(--color-text-muted, #878580);
+}
+
+/* Rich text from Sanity */
+
+.prose {
+  line-height: 1.5;
+  max-width: 68ch;
+}
+
+.prose p {
+  margin: 0 0 1em;
+}
+
+.prose h1,
+.prose h2,
+.prose h3 {
+  margin: 2.2em 0 0.7em;
+  font-weight: inherit;
+  color: var(--color-text-muted, #878580);
+}
+
+.prose > h2:first-child,
+.prose > h1:first-child {
+  margin-top: 0;
+}
+
+.prose ul,
+.prose ol {
+  margin: 0 0 1em;
+  padding-left: 2ch;
+}
+
+.prose ul {
+  list-style: disc;
+}
+
+.prose ol {
+  list-style: decimal;
+}
+
+.prose li {
+  margin-bottom: 0.6em;
+  padding-left: 0.4ch;
+}
+
+.prose a {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.prose strong {
+  font-weight: inherit;
+  text-decoration: none;
+}
+
+/* Contact details */
+
+.details {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  margin: 40px 0 0;
+}
+
+.detail dt {
+  color: var(--color-text-muted, #878580);
+  margin-bottom: 4px;
+}
+
+.detail dd {
+  margin: 0;
+  line-height: 1.5;
+  white-space: pre-line;
+}
+
+.detail a {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.hours {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  column-gap: 2ch;
+  row-gap: 2px;
+  white-space: normal;
+}
+
+.note {
+  margin: 0;
+  max-width: 34ch;
+  line-height: 1.5;
+  color: var(--color-text-muted, #878580);
+}
+
+/* Contact form */
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  max-width: 60ch;
+}
+
+.formIntro {
+  margin: 0;
+  line-height: 1.5;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field label {
+  color: var(--color-text-muted, #878580);
+}
+
+.field input,
+.field select,
+.field textarea {
+  width: 100%;
+  font: inherit;
+  letter-spacing: inherit;
+  color: inherit;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid #000;
+  border-radius: 0;
+  padding: 8px 0;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.field select {
+  cursor: pointer;
+  background-image: linear-gradient(45deg, transparent 50%, currentColor 50%),
+    linear-gradient(135deg, currentColor 50%, transparent 50%);
+  background-position:
+    calc(100% - 8px) 55%,
+    calc(100% - 3px) 55%;
+  background-size:
+    5px 5px,
+    5px 5px;
+  background-repeat: no-repeat;
+  padding-right: 20px;
+}
+
+.field textarea {
+  resize: vertical;
+  min-height: 140px;
+  line-height: 1.5;
+}
+
+.field input:focus-visible,
+.field select:focus-visible,
+.field textarea:focus-visible {
+  border-bottom-width: 2px;
+  padding-bottom: 7px;
+}
+
+.field [aria-invalid="true"] {
+  border-bottom-color: #b3261e;
+}
+
+.error,
+.formError {
+  color: #b3261e;
+  margin: 0;
+}
+
+.honeypot {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.submit {
+  align-self: flex-start;
+  font: inherit;
+  letter-spacing: inherit;
+  background: #000;
+  color: #fff;
+  border: 0;
+  border-radius: 0;
+  padding: 12px 28px;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.submit:hover {
+  opacity: 0.8;
+}
+
+.submit:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.formSuccess {
+  max-width: 60ch;
+  line-height: 1.5;
+  border-top: 1px solid #000;
+  padding-top: 16px;
+}
+
+.formSuccess p {
+  margin: 0;
+}
+
+/* Tablet and mobile: stack title, then content, full width */
+@media (max-width: 768px) {
+  .page {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 40px;
+    padding-top: 48px;
+  }
+
+  .aside,
+  .content,
+  .contentWide {
+    grid-column: 1;
+  }
+
+  .details {
+    margin-top: 32px;
+  }
+
+  .submit {
+    align-self: stretch;
+    text-align: center;
+  }
+}
+
+/* Delivery region selector at the top of the Shipping & Taxes page */
+.selectorBlock {
+  margin-bottom: 2.4em;
+}

@@ -1,4 +1,4 @@
-import { AsteriskIcon, CubeIcon, DocumentTextIcon, EditIcon } from "@sanity/icons";
+import { AsteriskIcon, CubeIcon, DocumentTextIcon, EditIcon, EnvelopeIcon, HelpCircleIcon, TagIcon } from "@sanity/icons";
 
 import type { StructureResolver } from "sanity/structure";
 import { singletonListItem, SINGLETONS } from "./singletons";
@@ -20,8 +20,12 @@ export const structure: StructureResolver = (S, _) =>
       S.divider(),
       S.documentTypeListItem("post").title("Posts").icon(EditIcon),
       S.divider(),
+      S.documentTypeListItem("policyPage").title("Customer Service Pages").icon(HelpCircleIcon),
+      S.documentTypeListItem("contactSubmission").title("Contact Messages").icon(EnvelopeIcon),
+      S.divider(),
       S.documentTypeListItem("collection").title("Collections").icon(CubeIcon),
       S.documentTypeListItem("product").title("Products").icon(AsteriskIcon),
+      S.documentTypeListItem("productType").title("Product Types").icon(TagIcon),
       S.divider(),
       singletonListItem(S, SINGLETONS.settings),
     ]);
