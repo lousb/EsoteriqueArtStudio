@@ -68,11 +68,20 @@
 
 /* Phones: logo on the left, cart and menu button on the right */
 @media (max-width: 768px) {
-  /* Pinned to the top of the screen; header-scroll.tsx releases it near the footer. */
+  /* Pinned to the top of the screen; header-scroll.tsx hides it near the footer. */
   .header {
     position: sticky;
     top: 0;
+    /* Above everything on the page. Only the cart drawer (100001) and the
+       mobile menu (100002) sit higher. */
+    z-index: 99990;
+    transition: transform 0.3s ease;
     will-change: transform;
+    /* The page has a 14px side margin (globals.css). Cancel it here and put it
+       back as padding so the header's white bar runs edge to edge. */
+    width: auto;
+    margin-inline: -14px;
+    padding-inline: 14px;
   }
   .headerGrid {
     grid-template-columns: 1fr auto;

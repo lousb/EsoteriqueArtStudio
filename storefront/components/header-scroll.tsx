@@ -2,13 +2,13 @@
 
 import { useEffect } from "react";
 
-/** Header stays pinned until the footer's top edge is this far from the top of the screen. */
-const RELEASE_AT = 100;
+/** The header hides once the footer has scrolled this far into the screen (from the bottom edge). */
+const HIDE_WHEN_FOOTER_IN = 100;
 
 /**
- * Phones only. The header is sticky (see layout.module.css); this slides it up
- * with the page once the footer gets within RELEASE_AT px of the top of the
- * screen, so it is fixed until then and leaves with the footer after.
+ * Phones only. The header is sticky (see layout.module.css). Once the footer's
+ * top edge is HIDE_WHEN_FOOTER_IN px up from the bottom of the screen, the header
+ * slides out of view, and it comes back when you scroll back up.
  */
 export function HeaderScroll() {
   useEffect(() => {
@@ -21,12 +21,11 @@ export function HeaderScroll() {
 
     const update = () => {
       frame = 0;
-      if (!phone.matches) {
-        header.style.transform = "";
-        return;
-      }
-      const y = Math.min(0, footer.getBoundingClientRect().top - RELEASE_AT);
-      header.style.transform = y ? `translate3d(0, ${y}px, 0)` : "";
+      const hide =
+        phone.matches &&
+        footer.getBoundingClientRect().top <=
+          window.innerHeight - HIDE_WHEN_FOOTER_IN;
+      header.style.transform = hide ? "translate3d(0, -100%, 0)" : "";
     };
     const schedule = () => {
       if (!frame) frame = requestAnimationFrame(update);

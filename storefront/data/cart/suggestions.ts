@@ -1,5 +1,6 @@
 import { getProducts } from "../shopify";
 import { getStoreProducts, isShopifyConfigured } from "../sanity/store-product";
+import { filterRecommendable, getActiveHandles } from "../recommendable";
 import type { Product } from "../../shopify/types";
 
 /**
@@ -12,7 +13,8 @@ export async function getCartSuggestions(): Promise<Product[]> {
       ? await getProducts({ sortKey: "TITLE", reverse: false, query: "" })
       : await getStoreProducts();
 
-    return all
+    const active = await getActiveHandles();
+    return filterRecommendable(all, active)
       .filter((p) => p.availableForSale && p.variants.length > 0)
       .map((p) => ({
         ...p,

@@ -18,6 +18,7 @@ import { ProductProvider } from "./product-context";
 import { Gallery } from "./gallery";
 import { ProductDetails } from "./product-details";
 import { getShipping } from "../../../data/shipping";
+import { filterRecommendable, getActiveHandles } from "../../../data/recommendable";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -76,7 +77,8 @@ export default async function Page(props: Props) {
 const allProducts = useShopify
   ? await getProducts({ sortKey: "TITLE", reverse: false, query: "" })
   : await getStoreProducts();
-const otherProducts = allProducts.filter(p => p.id !== product.id);
+const activeHandles = await getActiveHandles();
+const otherProducts = filterRecommendable(allProducts, activeHandles).filter(p => p.id !== product.id);
 const seed = product.id.split("").reduce((acc, c) => acc + c.charCodeAt(0), 0);
 const relatedProducts = [0, 1, 2].map(i => otherProducts[(seed + i) % otherProducts.length]).filter(Boolean);
 
