@@ -1,10 +1,45 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { sanityFetch } from "../../../data/sanity";
 import { POST_QUERY, ALL_POST_SLUGS } from "../../../data/sanity/queries";
 import { BlogPageBuilder } from "../../../components/blog-page-builder";
 import { MediaItem } from "../../../components/media-item";
+import { resolveOpenGraphImage } from "../../../sanity/utils";
+import { toPlainText } from "../../../data/seo";
+import { blogPostingJsonLd } from "../../../data/seo/json-ld";
 
 type Props = { params: Promise<{ slug: string }> };
+
+export async function generateMetadata(props: Props): Promise<Metadata> {
+  const params = await props.params;
+  const { data: post } = await sanityFetch({ query: POST_QUERY, params, stega: false });
+  if (!post?._id) return {};
+
+  const title = post.pageSeo?.title || post.title;
+  const description = post.pageSeo?.description || toPlainText(post.excerpt);
+  const ogImage = resolveOpenGraphImage(post.pageSeo?.ogImage || post.cover?.image);
+  const path = `/archive/${params.slug}`;
+
+  return {
+    title,
+    description,
+    alternates: { canonical: path },
+    openGraph: {
+      type: "article",
+      url: path,
+      title,
+      description,
+      images: ogImage ? [ogImage] : undefined,
+      publishedTime: post.date || undefined,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: ogImage ? [ogImage.url] : undefined,
+    },
+  } satisfies Metadata;
+}
 
 export async function generateStaticParams() {
   const { data } = await sanityFetch({
@@ -24,8 +59,19 @@ export default async function Page(props: Props) {
 
   if (!post?._id) return notFound();
 
+  const postLd = blogPostingJsonLd({
+    headline: post.title,
+    description: toPlainText(post.excerpt),
+    path: `/archive/${params.slug}`,
+    datePublished: post.date,
+  });
+
   return (
     <div className="blog-post-page">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(postLd) }}
+      />
       {/* Header */}
       <div style={{ marginBottom: "4rem" }}>
         

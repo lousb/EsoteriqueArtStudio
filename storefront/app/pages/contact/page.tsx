@@ -4,7 +4,13 @@ import { SETTINGS_QUERY } from "../../../data/sanity/queries";
 import { ContactForm } from "../../../components/contact-form";
 import s from "../../../components/info-page.module.css";
 
-export const metadata: Metadata = { title: "Contact" };
+export const metadata: Metadata = {
+  title: "Contact",
+  description:
+    "Get in touch with Esoterique Art Studio about an order, returns, shipping or wholesale enquiries.",
+  alternates: { canonical: "/pages/contact" },
+  openGraph: { type: "website", url: "/pages/contact", title: "Contact" },
+};
 
 type ContactData = {
   email?: string | null;

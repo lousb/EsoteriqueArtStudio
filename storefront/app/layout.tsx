@@ -11,6 +11,13 @@ import { DraftModeToast } from "./draft-mode-toast";
 import { sanityFetch, SanityLive } from "../data/sanity";
 import { HOME_QUERY, SETTINGS_QUERY } from "../data/sanity/queries";
 import { resolveOpenGraphImage } from "../sanity/utils";
+import {
+  DEFAULT_DESCRIPTION,
+  SITE_NAME,
+  SITE_URL,
+  isNonProductionDeployment,
+} from "../data/seo";
+import { organizationJsonLd, websiteJsonLd } from "../data/seo/json-ld";
 import { handleError } from "./client-utils";
 
 import { Inter } from 'next/font/google'
@@ -44,7 +51,7 @@ const inter = Inter({
  * Learn more: https://nextjs.org/docs/app/api-reference/functions/generate-metadata#generatemetadata-function
  */
 export async function generateMetadata(): Promise<Metadata> {
-  const [{ data: settings }, { data: home }] = await Promise.all([
+  const [{ data: settings }, { data: home }, draft] = await Promise.all([
     sanityFetch({
       query: SETTINGS_QUERY,
       // Metadata should never contain stega
@@ -55,20 +62,25 @@ export async function generateMetadata(): Promise<Metadata> {
       // Metadata should never contain stega
       stega: false,
     }),
+    draftMode(),
   ]);
-  const title = settings?.title || "Sanity Photon";
-  const description =
-    home?.pageSeo?.description || "Esoterique Art Studio";
+  const title = settings?.title || SITE_NAME;
+  const description = home?.pageSeo?.description || DEFAULT_DESCRIPTION;
 
   const ogImage = resolveOpenGraphImage(home?.pageSeo?.ogImage);
-  let metadataBase: URL | undefined = undefined;
+  let metadataBase: URL;
   try {
     metadataBase = settings?.metadataBase
       ? new URL(settings.metadataBase)
-      : undefined;
+      : new URL(SITE_URL);
   } catch {
-    // ignore
+    metadataBase = new URL(SITE_URL);
   }
+
+  // A Sanity draft-mode preview or a Vercel preview/branch deployment should
+  // never show up in search results, only the real production site.
+  const noindex = draft.isEnabled || isNonProductionDeployment();
+
   return {
     metadataBase,
     title: {
@@ -76,6 +88,14 @@ export async function generateMetadata(): Promise<Metadata> {
       default: title,
     },
     description: description,
+    applicationName: SITE_NAME,
+    robots: noindex
+      ? { index: false, follow: false }
+      : {
+          index: true,
+          follow: true,
+          googleBot: { index: true, follow: true, "max-image-preview": "large" },
+        },
     // Favicon files live in /public so they are served from the site root.
     icons: {
       icon: [
@@ -88,7 +108,17 @@ export async function generateMetadata(): Promise<Metadata> {
     manifest: "/site.webmanifest",
     other: { "apple-mobile-web-app-title": "Esoterique" },
     openGraph: {
+      type: "website",
+      siteName: title,
+      locale: "en_AU",
+      url: "/",
       images: ogImage ? [ogImage] : [],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: ogImage ? [ogImage.url] : [],
     },
   };
 }
@@ -98,8 +128,13 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const [{ isEnabled: isDraftMode }, cookieStore, ratesResult] =
-    await Promise.all([draftMode(), cookies(), getRates()]);
+  const [{ isEnabled: isDraftMode }, cookieStore, ratesResult, { data: settings }] =
+    await Promise.all([
+      draftMode(),
+      cookies(),
+      getRates(),
+      sanityFetch({ query: SETTINGS_QUERY, stega: false }),
+    ]);
   const initialCurrency =
     cookieStore.get(CURRENCY_COOKIE)?.value?.toUpperCase() || BASE_CURRENCY;
 
@@ -107,6 +142,17 @@ export default async function RootLayout({
     <ViewTransitions>
     <html lang="en" className={inter.className}>
       <body>
+        {/* Sitewide structured data: lets Google associate the site with the
+            brand name, logo and social profiles (Organization + WebSite). */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify([
+              organizationJsonLd({ instagramUrl: settings?.contact?.instagramUrl }),
+              websiteJsonLd(),
+            ]),
+          }}
+        />
         {/* The <Toaster> component is responsible for rendering toast notifications used in /app/client-utils.ts and /app/components/DraftModeToast.tsx */}
         <Toaster />
         {isDraftMode && (

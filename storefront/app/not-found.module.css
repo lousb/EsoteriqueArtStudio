@@ -1,0 +1,35 @@
+/* Mirrors the cart's empty state: a centered grey box with a plain text
+   link underneath, on its own full-height section of the page. */
+.wrap {
+  min-height: 60vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 26px;
+  padding: 40px 36px;
+  text-align: center;
+}
+
+.box {
+  background: #f1f1f1;
+  border-radius: 3px;
+  padding: 20px 16px;
+  max-width: 32ch;
+}
+
+.box p {
+  margin: 0;
+}
+
+.code {
+  display: block;
+  margin: 0 0 6px;
+  color: var(--color-text-muted, #878580);
+}
+
+.link {
+  color: inherit;
+  text-decoration: underline;
+  padding: 4px;
+}

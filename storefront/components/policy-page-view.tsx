@@ -9,6 +9,7 @@ import {
 } from "../data/policies/defaults";
 import { getShipping } from "../data/shipping";
 import { CustomPortableText } from "./custom-portable-text";
+import { toPlainText } from "../data/seo";
 import { ShippingSelector } from "./shipping-selector";
 import s from "./info-page.module.css";
 
@@ -74,7 +75,21 @@ export async function policyMetadata(
   slug: string,
 ): Promise<Metadata> {
   const policy = await resolvePolicy(section, slug);
-  return { title: policy?.title };
+  const fallback = getPolicyDefault(section, slug);
+  const description = fallback?.intro ? toPlainText(fallback.intro) : undefined;
+  const path = `/${section}/${slug}`;
+
+  return {
+    title: policy?.title,
+    description,
+    alternates: { canonical: path },
+    openGraph: {
+      type: "website",
+      url: path,
+      title: policy?.title,
+      description,
+    },
+  } satisfies Metadata;
 }
 
 export async function PolicyPageView({

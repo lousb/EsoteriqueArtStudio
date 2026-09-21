@@ -12,7 +12,8 @@ import {
 } from "../../../data/sanity/queries";
 import { getCollectionProducts, getProduct, getProducts, getProductRecommendations } from "../../../data/shopify";
 import { getStoreProduct, getStoreProducts, isShopifyConfigured } from "../../../data/sanity/store-product";
-import { resolveOpenGraphImage } from "../../../sanity/utils";
+import { directOgImage, toPlainText } from "../../../data/seo";
+import { breadcrumbJsonLd, productJsonLd } from "../../../data/seo/json-ld";
 import s from "./page.module.css";
 
 const EYEWEAR_EXCERPT = "Premium eyewear. Fits most head shapes.";
@@ -46,13 +47,26 @@ export async function generateMetadata(
     stega: false,
   });
   const previousImages = (await parent).openGraph?.images || [];
-  const ogImage = resolveOpenGraphImage(product?.store?.previewImageUrl);
+  const ogImage = directOgImage(product?.store?.previewImageUrl, product?.store?.title);
+  const description = toPlainText(product?.store?.descriptionHtml);
+  const path = `/products/${params.slug}`;
 
   return {
     title: product?.store?.title,
-    description: product?.store?.descriptionHtml,
+    description,
+    alternates: { canonical: path },
     openGraph: {
+      type: "website",
+      url: path,
+      title: product?.store?.title ?? undefined,
+      description,
       images: ogImage ? [ogImage, ...previousImages] : previousImages,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: product?.store?.title ?? undefined,
+      description,
+      images: ogImage ? [ogImage.url] : undefined,
     },
   } satisfies Metadata;
 }
@@ -84,7 +98,6 @@ const otherProducts = filterRecommendable(allProducts, activeHandles).filter(p =
 const seed = product.id.split("").reduce((acc, c) => acc + c.charCodeAt(0), 0);
 const relatedProducts = [0, 1, 2].map(i => otherProducts[(seed + i) % otherProducts.length]).filter(Boolean);
 
-console.log("relatedProducts", relatedProducts.length);
 
   const shipping = await getShipping();
 
@@ -106,29 +119,29 @@ console.log("relatedProducts", relatedProducts.length);
     productType?: { title?: string | null; excerpt?: string | null } | null;
   } | null;
 
-  const productJsonLd = {
-    "@context": "https://schema.org",
-    "@type": "Product",
+  const productLd = productJsonLd({
     name: product.title,
     description: product.description,
-    image: product.featuredImage.url,
-    offers: {
-      "@type": "AggregateOffer",
-      availability: product.availableForSale
-        ? "https://schema.org/InStock"
-        : "https://schema.org/OutOfStock",
-      priceCurrency: product.priceRange.minVariantPrice.currencyCode,
-      highPrice: product.priceRange.maxVariantPrice.amount,
-      lowPrice: product.priceRange.minVariantPrice.amount,
-    },
-  };
+    images: (product.images?.length ? product.images.map((i) => i.url) : [product.featuredImage.url]),
+    handle: product.handle,
+    availableForSale: product.availableForSale,
+    currencyCode: product.priceRange.minVariantPrice.currencyCode,
+    minPrice: product.priceRange.minVariantPrice.amount,
+    maxPrice: product.priceRange.maxVariantPrice.amount,
+    offerCount: product.variants.length || 1,
+  });
+
+  const breadcrumbLd = breadcrumbJsonLd([
+    { name: "Shop", path: "/products" },
+    { name: product.title, path: `/products/${product.handle}` },
+  ]);
 
   return (
     <Suspense>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify(productJsonLd),
+          __html: JSON.stringify([productLd, breadcrumbLd]),
         }}
       />
       <ProductProvider>

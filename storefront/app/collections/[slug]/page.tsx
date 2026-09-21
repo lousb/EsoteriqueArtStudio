@@ -1,5 +1,4 @@
 import type { Metadata, ResolvingMetadata } from "next";
-import Head from "next/head";
 import { notFound } from "next/navigation";
 import { sanityFetch } from "../../../data/sanity";
 import {
@@ -8,7 +7,8 @@ import {
   COLLECTION_QUERY,
 } from "../../../data/sanity/queries";
 import { PageBuilder } from "../../../components/page-builder";
-import { resolveOpenGraphImage } from "../../../sanity/utils";
+import { directOgImage, toPlainText } from "../../../data/seo";
+import { breadcrumbJsonLd } from "../../../data/seo/json-ld";
 import { PLP } from "../../../components/plp";
 
 type Props = {
@@ -45,13 +45,26 @@ export async function generateMetadata(
     stega: false,
   });
   const previousImages = (await parent).openGraph?.images || [];
-  const ogImage = resolveOpenGraphImage(collection?.store?.imageUrl);
+  const ogImage = directOgImage(collection?.store?.imageUrl, collection?.store?.title);
+  const description = toPlainText(collection?.store?.descriptionHtml);
+  const path = `/collections/${params.slug}`;
 
   return {
     title: collection?.store?.title,
-    description: collection?.store?.descriptionHtml,
+    description,
+    alternates: { canonical: path },
     openGraph: {
+      type: "website",
+      url: path,
+      title: collection?.store?.title ?? undefined,
+      description,
       images: ogImage ? [ogImage, ...previousImages] : previousImages,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: collection?.store?.title ?? undefined,
+      description,
+      images: ogImage ? [ogImage.url] : undefined,
     },
   } satisfies Metadata;
 }
@@ -67,11 +80,17 @@ export default async function Page(props: Props) {
     return notFound();
   }
 
+  const breadcrumbLd = breadcrumbJsonLd([
+    { name: "Shop", path: "/products" },
+    { name: collectionPage.name, path: `/collections/${params.slug}` },
+  ]);
+
   return (
     <>
-      <Head>
-        <title>{collectionPage.name}</title>
-      </Head>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
+      />
       {!!collectionPage.editorial && (
         <PageBuilder page={collectionPage.editorial} />
       )}

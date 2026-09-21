@@ -1,10 +1,10 @@
 import { PageBuilder } from "../../components/page-builder";
 
 import type { Metadata } from "next";
-import Head from "next/head";
 import { notFound } from "next/navigation";
 import { sanityFetch } from "../../data/sanity";
 import { ALL_PAGES_SLUGS, PAGE_QUERY } from "../../data/sanity/queries";
+import { resolveOpenGraphImage } from "../../sanity/utils";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -37,9 +37,26 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     stega: false,
   });
 
+  const ogImage = resolveOpenGraphImage(page?.pageSeo?.ogImage);
+  const path = `/${params.slug}`;
+
   return {
     title: page?.name,
     description: page?.pageSeo?.description,
+    alternates: { canonical: path },
+    openGraph: {
+      type: "website",
+      url: path,
+      title: page?.name ?? undefined,
+      description: page?.pageSeo?.description ?? undefined,
+      images: ogImage ? [ogImage] : undefined,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: page?.name ?? undefined,
+      description: page?.pageSeo?.description ?? undefined,
+      images: ogImage ? [ogImage.url] : undefined,
+    },
   } satisfies Metadata;
 }
 
@@ -51,12 +68,5 @@ export default async function Page(props: Props) {
     return notFound();
   }
 
-  return (
-    <>
-      <Head>
-        <title>{page.name}</title>
-      </Head>
-      <PageBuilder page={page} />
-    </>
-  );
+  return <PageBuilder page={page} />;
 }

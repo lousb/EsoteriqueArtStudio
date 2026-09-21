@@ -1,6 +1,29 @@
+import type { Metadata } from "next";
 import { sanityFetch } from "../../data/sanity";
 import { ARCHIVE_QUERY, ALL_POSTS_QUERY } from "../../data/sanity/queries";
 import { ArchiveGrid } from "../../components/archive-grid.tsx";
+import { resolveOpenGraphImage } from "../../sanity/utils";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const { data: archive } = await sanityFetch({ query: ARCHIVE_QUERY, stega: false });
+  const title = archive?.pageSeo?.title || archive?.title || "Archive";
+  const description = archive?.pageSeo?.description || archive?.description || undefined;
+  const ogImage = resolveOpenGraphImage(archive?.pageSeo?.ogImage);
+
+  return {
+    title,
+    description,
+    alternates: { canonical: "/archive" },
+    openGraph: {
+      type: "website",
+      url: "/archive",
+      title,
+      description,
+      images: ogImage ? [ogImage] : undefined,
+    },
+    twitter: { card: "summary_large_image", title, description },
+  } satisfies Metadata;
+}
 
 type Post = {
   _id: string;

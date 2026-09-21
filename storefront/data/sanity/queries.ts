@@ -151,6 +151,11 @@ export const POLICY_PAGE_QUERY = defineQuery(`
     body
   }`);
 
+export const ALL_POLICY_PAGE_SLUGS = defineQuery(`
+  *[_type == "policyPage" && defined(slug.current)]
+  {"slug": slug.current, section}
+`);
+
 export const HOME_QUERY = defineQuery(`
   *[_type == 'home' ][0]{
     _type,
