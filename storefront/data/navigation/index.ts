@@ -3,6 +3,14 @@ import { SETTINGS_QUERY } from "../sanity/queries";
 
 export type NavLink = { _key?: string; label: string; href: string };
 
+/**
+ * Pages hidden from the footer and menu for now. Delete a path from this list
+ * to bring its link back.
+ */
+export const HIDDEN_HREFS = ["/about", "/archive"];
+
+export const isHidden = (href: string) => HIDDEN_HREFS.includes(href);
+
 /** Used when no Instagram link is set in the Sanity settings. */
 export const INSTAGRAM_URL = "https://instagram.com/esoteriqueartstudio";
 
@@ -48,7 +56,7 @@ export async function getMenuLinks(): Promise<MenuLinks> {
   const shopArchive: NavLink[] = [
     { label: "Shop", href: "/products" },
     { label: "Archive", href: "/archive" },
-  ];
+  ].filter((l) => !isHidden(l.href));
 
   try {
     const { data: settings } = await sanityFetch({ query: SETTINGS_QUERY });

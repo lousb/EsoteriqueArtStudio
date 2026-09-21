@@ -7,6 +7,7 @@ import {
   DEFAULT_CUSTOMER_SERVICE,
   DEFAULT_EXPLORE,
   INSTAGRAM_URL,
+  isHidden,
   MENU_INTRO,
   type NavLink,
 } from "../data/navigation";
@@ -68,14 +69,16 @@ export async function SiteFooter() {
       (l): l is FooterLink => !!l && !!l.label && !!l.href,
     );
 
-  const exploreLinks = clean(footer?.exploreLinks);
+  const exploreLinks = clean(footer?.exploreLinks).filter(
+    (l) => !isHidden(l.href),
+  );
   const serviceLinks = clean(footer?.customerServiceLinks);
 
   // Explore falls back to the defaults, plus Instagram when we have a URL.
   const explore: FooterLink[] = exploreLinks.length
     ? exploreLinks
     : [
-        ...DEFAULT_EXPLORE,
+        ...DEFAULT_EXPLORE.filter((l) => !isHidden(l.href)),
         { label: "Instagram", href: contact?.instagramUrl || INSTAGRAM_URL },
       ];
 
