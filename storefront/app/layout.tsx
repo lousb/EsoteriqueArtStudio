@@ -27,6 +27,10 @@ import { Link, ViewTransitions } from 'next-view-transitions'
 import LenisProvider from "../components/lenis-provider";
 import { Suspense } from "react";
 import { NavLinks } from "../components/nav-links";
+import { getCartSuggestions } from "../data/cart/suggestions";
+import { getMenuLinks } from "../data/navigation";
+import { MobileMenu } from "../components/mobile-menu";
+import { HeaderScroll } from "../components/header-scroll";
 
 const inter = Inter({
   subsets: ['latin'],
@@ -72,6 +76,17 @@ export async function generateMetadata(): Promise<Metadata> {
       default: title,
     },
     description: description,
+    // Favicon files live in /public so they are served from the site root.
+    icons: {
+      icon: [
+        { url: "/favicon-96x96.png", type: "image/png", sizes: "96x96" },
+        { url: "/favicon.svg", type: "image/svg+xml" },
+      ],
+      shortcut: "/favicon.ico",
+      apple: { url: "/apple-touch-icon.png", sizes: "180x180" },
+    },
+    manifest: "/site.webmanifest",
+    other: { "apple-mobile-web-app-title": "Esoterique" },
     openGraph: {
       images: ogImage ? [ogImage] : [],
     },
@@ -111,6 +126,7 @@ export default async function RootLayout({
         >
         <CartProvider>
           <Header />
+          <HeaderScroll />
           <main>
             <Suspense fallback={null}>
             <LenisProvider>
@@ -131,15 +147,22 @@ export default async function RootLayout({
   );
 }
 
-export function Header() {
+export async function Header() {
+  const [suggestions, menuLinks] = await Promise.all([
+    getCartSuggestions(),
+    getMenuLinks(),
+  ]);
   return (
-    <header className={s.header}>
+    <header className={s.header} data-site-header>
       <nav className={s.nav}>
         <div className={s.headerGrid}>
-          <div><Link href="/">ƎE</Link></div>
+          <div><Link href="/">Esoterique Art Studio</Link></div>
           <div />
           <div><NavLinks /></div>
-          <div className={s.cartCol}><LocalCart /></div>
+          <div className={s.cartCol}>
+            <LocalCart suggestions={suggestions} />
+            <MobileMenu links={menuLinks} />
+          </div>
         </div>
       </nav>
     </header>

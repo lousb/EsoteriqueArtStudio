@@ -63,6 +63,24 @@
 .cartCol {
   display: flex;
   justify-content: flex-end;
+  align-items: center;
+}
+
+/* Phones: logo on the left, cart and menu button on the right */
+@media (max-width: 768px) {
+  /* Pinned to the top of the screen; header-scroll.tsx releases it near the footer. */
+  .header {
+    position: sticky;
+    top: 0;
+    will-change: transform;
+  }
+  .headerGrid {
+    grid-template-columns: 1fr auto;
+  }
+  .headerGrid > :nth-child(2),
+  .headerGrid > :nth-child(3) {
+    display: none;
+  }
 }
 
 .footer ul {

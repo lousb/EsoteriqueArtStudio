@@ -2,23 +2,17 @@ import { Link } from "next-view-transitions";
 import { sanityFetch } from "../data/sanity";
 import { SETTINGS_QUERY } from "../data/sanity/queries";
 import { CurrencySelect } from "./currency-select";
+import { ExternalArrow } from "./external-arrow";
+import {
+  DEFAULT_CUSTOMER_SERVICE,
+  DEFAULT_EXPLORE,
+  INSTAGRAM_URL,
+  MENU_INTRO,
+  type NavLink,
+} from "../data/navigation";
 import s from "./site-footer.module.css";
 
-type FooterLink = { _key?: string; label: string; href: string };
-
-const DEFAULT_EXPLORE: FooterLink[] = [
-  { label: "About", href: "/about" },
-  { label: "Shop", href: "/products" },
-  { label: "Stories", href: "/archive" },
-];
-
-const DEFAULT_CUSTOMER_SERVICE: FooterLink[] = [
-  { label: "Contact", href: "/pages/contact" },
-  { label: "Shipping & Taxes", href: "/pages/shipping-taxes" },
-  { label: "Returns", href: "/pages/returns" },
-  { label: "Privacy Policy", href: "/policies/privacy-policy" },
-  { label: "Terms of Service", href: "/policies/terms-of-service" },
-];
+type FooterLink = NavLink;
 
 const DEFAULT_ACKNOWLEDGEMENT =
   "Respectfully acknowledging the Gadigal people of the Eora Nation as the Traditional Custodians of the land we work on. Sydney, Australia.";
@@ -37,6 +31,7 @@ function FooterAnchor({ href, children }: { href: string; children: string }) {
         rel={newTab ? "noopener noreferrer" : undefined}
       >
         {children}
+        {newTab ? <ExternalArrow /> : null}
       </a>
     );
   }
@@ -81,9 +76,7 @@ export async function SiteFooter() {
     ? exploreLinks
     : [
         ...DEFAULT_EXPLORE,
-        ...(contact?.instagramUrl
-          ? [{ label: "Instagram", href: contact.instagramUrl }]
-          : []),
+        { label: "Instagram", href: contact?.instagramUrl || INSTAGRAM_URL },
       ];
 
   const service = serviceLinks.length ? serviceLinks : DEFAULT_CUSTOMER_SERVICE;
@@ -92,10 +85,7 @@ export async function SiteFooter() {
   const year = new Date().getFullYear();
 
   return (
-    <div className={s.wrap}>
-      <Link href="/products" className={s.shopLabel}>
-        {footer?.shopLabel || "Shop Eyewear"}
-      </Link>
+    <div className={s.wrap} data-site-footer>
 
       <footer className={s.footer}>
         {/* Level one */}
@@ -104,7 +94,10 @@ export async function SiteFooter() {
             <Link href="/" className={s.logo} aria-label="Home">
               ƎE
             </Link>
+            <p className={s.intro}>{MENU_INTRO}</p>
           </div>
+
+          
           <div className={`${s.block} ${s.b2}`}>
             <LinkList
               title={footer?.exploreTitle || "Explore"}

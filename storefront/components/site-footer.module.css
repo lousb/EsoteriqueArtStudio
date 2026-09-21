@@ -58,6 +58,21 @@
 
 .logo {
   display: inline-block;
+  color: var(--color-text, #000);
+}
+
+/* Muted copy, the same on every screen size. Same width as the
+   acknowledgement below it so the two first columns line up. */
+.intro,
+.acknowledgement,
+.copyright {
+  color: var(--color-text-muted, #878580);
+}
+
+.intro {
+  margin: 24px 0 0;
+  max-width: 34ch;
+  line-height: 1.4;
 }
 
 .heading {
@@ -181,6 +196,7 @@
     grid-column: 1 / -1;
   }
 
+  .intro,
   .acknowledgement,
   .currencyNote {
     max-width: none;

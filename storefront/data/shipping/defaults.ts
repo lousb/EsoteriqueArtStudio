@@ -25,7 +25,7 @@ export const DEFAULT_SHIPPING_REGIONS: ShippingRegion[] = [
     lines: [
       "Free delivery on every order",
       "Standard post, 3 to 7 working days, free",
-      "Express post, 1 to 3 working days, $9",
+      "Express post, 1 to 3 working days, $9 (free with 2 or more pieces)",
     ],
   },
   {

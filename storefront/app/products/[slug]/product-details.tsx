@@ -117,7 +117,7 @@ export function ProductDetails({
 
       {relatedProducts.length > 0 && (
         <section className={`${s.section} ${s.related}`}>
-          <h2 className={s.heading}>Related Products</h2>
+          <h2 className={s.heading}>Recommended Products</h2>
           <div className={s.thumbs}>
             {relatedProducts.slice(0, 3).map((related) => (
               <Link
