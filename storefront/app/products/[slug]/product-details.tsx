@@ -53,7 +53,9 @@ export function ProductDetails({
   excerpt,
   relatedProducts,
   shipping,
+  dbg = [],
 }: {
+  dbg?: string[];
   product: Product;
   colourway?: string | null;
   excerpt?: string | null;
@@ -71,10 +73,10 @@ export function ProductDetails({
 
       {/* On mobile this button is pinned to the bottom of the screen instead */}
       <div className={s.cart}>
-        <AddToCart product={product} />
+        {!dbg.includes("cart") && <AddToCart product={product} />}
       </div>
 
-      <div className={s.priceBlock}>
+      {!dbg.includes("price") && <div className={s.priceBlock}>
         <p>
           <Price
             amount={minVariantPrice.amount}
@@ -85,7 +87,7 @@ export function ProductDetails({
         <p className={s.payLater}>
           Or Pay Later with <AfterpayIcon />
         </p>
-      </div>
+      </div>}
 
       {excerpt ? <p className={s.excerpt}>{excerpt}</p> : null}
 
@@ -95,7 +97,7 @@ export function ProductDetails({
           We aim to dispatch orders within 1-2 business days. All orders are
           sent from our warehouse in Sydney, Australia.
         </p>
-        <ShippingSelector label={shipping.label} regions={shipping.regions} />
+        {!dbg.includes("ship") && <ShippingSelector label={shipping.label} regions={shipping.regions} />}
       </section>
 
       <section className={`${s.section} ${s.info}`}>
@@ -115,7 +117,7 @@ export function ProductDetails({
         <span className={s.underline}>Returns Policy</span>
       </Link>
 
-      {relatedProducts.length > 0 && (
+      {!dbg.includes("rel") && relatedProducts.length > 0 && (
         <section className={`${s.section} ${s.related}`}>
           <h2 className={s.heading}>Related Products</h2>
           <div className={s.thumbs}>

@@ -181,11 +181,60 @@ export type Header = {
   } & Link>;
 };
 
+export type FooterLink = {
+  _type: "footerLink";
+  label: string;
+  href: string;
+};
+
 export type Footer = {
   _type: "footer";
   links?: Array<{
     _key: string;
   } & Link>;
+  shopLabel?: string;
+  exploreTitle?: string;
+  exploreLinks?: Array<{
+    _key: string;
+  } & FooterLink>;
+  customerServiceTitle?: string;
+  customerServiceLinks?: Array<{
+    _key: string;
+  } & FooterLink>;
+  acknowledgement?: string;
+  legalName?: string;
+};
+
+export type ShippingSettings = {
+  _type: "shippingSettings";
+  selectorLabel?: string;
+  regions?: Array<{
+    name: string;
+    lines: Array<string>;
+    _type: "shippingRegion";
+    _key: string;
+  }>;
+};
+
+export type ContactSettings = {
+  _type: "contactSettings";
+  email?: string;
+  phone?: string;
+  instagramUrl?: string;
+  instagramHandle?: string;
+  address?: string;
+  hours?: Array<{
+    days: string;
+    hours: string;
+    _type: "hoursRow";
+    _key: string;
+  }>;
+  note?: string;
+  formEnabled?: boolean;
+  formRecipient?: string;
+  formSubjects?: Array<string>;
+  formIntro?: string;
+  formSuccessMessage?: string;
 };
 
 export type AnnouncementBar = {
@@ -345,6 +394,33 @@ export type Slug = {
   source?: string;
 };
 
+export type PolicyPage = {
+  _id: string;
+  _type: "policyPage";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  title: string;
+  section: "pages" | "policies";
+  slug: Slug;
+  lastUpdated?: string;
+  body?: BlockContent;
+};
+
+export type ContactSubmission = {
+  _id: string;
+  _type: "contactSubmission";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  name?: string;
+  email?: string;
+  subject?: string;
+  message?: string;
+  submittedAt?: string;
+  status?: "new" | "replied" | "archived";
+};
+
 export type Collection = {
   _id: string;
   _type: "collection";
@@ -404,6 +480,8 @@ export type Settings = {
   title: string;
   header: Header;
   footer: Footer;
+  contact?: ContactSettings;
+  shipping?: ShippingSettings;
   defaultProductInformation?: Array<{
     _key: string;
   } & ProductInformation>;
@@ -440,6 +518,13 @@ export type SanityImageHotspot = {
   width: number;
 };
 
+export type ProductTypeReference = {
+  _ref: string;
+  _type: "reference";
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: "productType";
+};
+
 export type Product = {
   _id: string;
   _type: "product";
@@ -448,6 +533,8 @@ export type Product = {
   _rev: string;
   titleProxy?: ProxyString;
   slugProxy?: ProxyString;
+  colourway?: string;
+  productType?: ProductTypeReference;
   overwriteDefaultInformationFields?: "noDefaults" | "complementDefaults";
   productInformation?: Array<{
     _key: string;
@@ -474,6 +561,17 @@ export type MuxVideoAssetReference = {
 export type MuxVideo = {
   _type: "mux.video";
   asset?: MuxVideoAssetReference;
+};
+
+export type ProductType = {
+  _id: string;
+  _type: "productType";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  title: string;
+  slug?: Slug;
+  excerpt?: string;
 };
 
 export type Color = {
@@ -691,11 +789,11 @@ export type Geopoint = {
   alt?: number;
 };
 
-export type AllSanitySchemaTypes = ShopifyProductVariant | ProductVariantReference | ShopifyProduct | CollectionRule | ShopifyCollection | ProxyString | ProductReference | ProductWithVariant | PriceRange | PlaceholderString | Option | Inventory | SanityImageAssetReference | PageSeo | PageReference | CollectionReference | Link | Header | Footer | AnnouncementBar | ProductInformation | ProductBlock | Picture | Newsletter | Media | ImageBlock | EditorialBlock | ContentRow | BlogFullwidthBlock | BlogContentBlock | BlogColumnBlock | BlockContent | ProductVariant | Post | Slug | Collection | Archive | Shop | Home | Settings | Page | SanityImageCrop | SanityImageHotspot | Product | MuxVideoAssetReference | MuxVideo | Color | MuxVideoAsset | MuxAssetData | MuxStaticRenditions | MuxStaticRenditionFile | MuxPlaybackId | MuxTrack | RgbaColor | HsvaColor | HslaColor | SanityImagePaletteSwatch | SanityImagePalette | SanityImageDimensions | SanityImageMetadata | SanityFileAsset | SanityAssetSourceData | SanityImageAsset | Geopoint;
+export type AllSanitySchemaTypes = ShopifyProductVariant | ProductVariantReference | ShopifyProduct | CollectionRule | ShopifyCollection | ProxyString | ProductReference | ProductWithVariant | PriceRange | PlaceholderString | Option | Inventory | SanityImageAssetReference | PageSeo | PageReference | CollectionReference | Link | Header | FooterLink | Footer | ShippingSettings | ContactSettings | AnnouncementBar | ProductInformation | ProductBlock | Picture | Newsletter | Media | ImageBlock | EditorialBlock | ContentRow | BlogFullwidthBlock | BlogContentBlock | BlogColumnBlock | BlockContent | ProductVariant | Post | Slug | PolicyPage | ContactSubmission | Collection | Archive | Shop | Home | Settings | Page | SanityImageCrop | SanityImageHotspot | ProductTypeReference | Product | MuxVideoAssetReference | MuxVideo | ProductType | Color | MuxVideoAsset | MuxAssetData | MuxStaticRenditions | MuxStaticRenditionFile | MuxPlaybackId | MuxTrack | RgbaColor | HsvaColor | HslaColor | SanityImagePaletteSwatch | SanityImagePalette | SanityImageDimensions | SanityImageMetadata | SanityFileAsset | SanityAssetSourceData | SanityImageAsset | Geopoint;
 export declare const internalGroqTypeReferenceTo: unique symbol;
 // Source: ./data/sanity/queries.ts
 // Variable: SETTINGS_QUERY
-// Query: *[_type == "settings"][0]{    _type,    _id,    _updatedAt,    _createdAt,    "title": coalesce(title, "Untitled Store"),    metadataBase,    defaultProductInformation,    header{      _type,      announcementBar{        _type,        content,        "link": links[0]{  _type,  _key,  linkType,  "url": select(    linkType == 'href' => href,    linkType == 'home' => '/',    linkType == 'plp' => '/products',    linkType == 'page' => '/' + page->slug.current,    linkType == 'product' => '/products/' + product->store.slug.current,    linkType == 'collection' => '/collections/' + collection->store.slug.current,  ),  "label": select(      label.length > 0 => label,      linkType == 'home' => 'Home',      linkType == 'plp' => 'All Products',      linkType == 'page' => page->name,      linkType == 'product' => product->store.title,      linkType == 'collection' => collection->store.title,      "Link"    ),  openInNewTab}      },      "links": links[]{  _type,  _key,  linkType,  "url": select(    linkType == 'href' => href,    linkType == 'home' => '/',    linkType == 'plp' => '/products',    linkType == 'page' => '/' + page->slug.current,    linkType == 'product' => '/products/' + product->store.slug.current,    linkType == 'collection' => '/collections/' + collection->store.slug.current,  ),  "label": select(      label.length > 0 => label,      linkType == 'home' => 'Home',      linkType == 'plp' => 'All Products',      linkType == 'page' => page->name,      linkType == 'product' => product->store.title,      linkType == 'collection' => collection->store.title,      "Link"    ),  openInNewTab}    },    footer{      _type,      shopLabel,      exploreTitle,      "exploreLinks": exploreLinks[]{_key, label, href},      customerServiceTitle,      "customerServiceLinks": customerServiceLinks[]{_key, label, href},      acknowledgement,      legalName,      "links": links[]{  _type,  _key,  linkType,  "url": select(    linkType == 'href' => href,    linkType == 'home' => '/',    linkType == 'plp' => '/products',    linkType == 'page' => '/' + page->slug.current,    linkType == 'product' => '/products/' + product->store.slug.current,    linkType == 'collection' => '/collections/' + collection->store.slug.current,  ),  "label": select(      label.length > 0 => label,      linkType == 'home' => 'Home',      linkType == 'plp' => 'All Products',      linkType == 'page' => page->name,      linkType == 'product' => product->store.title,      linkType == 'collection' => collection->store.title,      "Link"    ),  openInNewTab}    },    contact{      email,      phone,      instagramUrl,      instagramHandle,      address,      "hours": hours[]{_key, days, hours},      note,      formEnabled,      formRecipient,      formSubjects,      formIntro,      formSuccessMessage    },  }
+// Query: *[_type == "settings"][0]{    _type,    _id,    _updatedAt,    _createdAt,    "title": coalesce(title, "Untitled Store"),    metadataBase,    defaultProductInformation,    header{      _type,      announcementBar{        _type,        content,        "link": links[0]{  _type,  _key,  linkType,  "url": select(    linkType == 'href' => href,    linkType == 'home' => '/',    linkType == 'plp' => '/products',    linkType == 'page' => '/' + page->slug.current,    linkType == 'product' => '/products/' + product->store.slug.current,    linkType == 'collection' => '/collections/' + collection->store.slug.current,  ),  "label": select(      label.length > 0 => label,      linkType == 'home' => 'Home',      linkType == 'plp' => 'All Products',      linkType == 'page' => page->name,      linkType == 'product' => product->store.title,      linkType == 'collection' => collection->store.title,      "Link"    ),  openInNewTab}      },      "links": links[]{  _type,  _key,  linkType,  "url": select(    linkType == 'href' => href,    linkType == 'home' => '/',    linkType == 'plp' => '/products',    linkType == 'page' => '/' + page->slug.current,    linkType == 'product' => '/products/' + product->store.slug.current,    linkType == 'collection' => '/collections/' + collection->store.slug.current,  ),  "label": select(      label.length > 0 => label,      linkType == 'home' => 'Home',      linkType == 'plp' => 'All Products',      linkType == 'page' => page->name,      linkType == 'product' => product->store.title,      linkType == 'collection' => collection->store.title,      "Link"    ),  openInNewTab}    },    footer{      _type,      shopLabel,      exploreTitle,      "exploreLinks": exploreLinks[]{_key, label, href},      customerServiceTitle,      "customerServiceLinks": customerServiceLinks[]{_key, label, href},      acknowledgement,      legalName,      "links": links[]{  _type,  _key,  linkType,  "url": select(    linkType == 'href' => href,    linkType == 'home' => '/',    linkType == 'plp' => '/products',    linkType == 'page' => '/' + page->slug.current,    linkType == 'product' => '/products/' + product->store.slug.current,    linkType == 'collection' => '/collections/' + collection->store.slug.current,  ),  "label": select(      label.length > 0 => label,      linkType == 'home' => 'Home',      linkType == 'plp' => 'All Products',      linkType == 'page' => page->name,      linkType == 'product' => product->store.title,      linkType == 'collection' => collection->store.title,      "Link"    ),  openInNewTab}    },    contact{      email,      phone,      instagramUrl,      instagramHandle,      address,      "hours": hours[]{_key, days, hours},      note,      formEnabled,      formRecipient,      formSubjects,      formIntro,      formSuccessMessage    },    shipping{      selectorLabel,      "regions": regions[]{_key, name, lines}    },  }
 export type SETTINGS_QUERYResult = {
   _type: "settings";
   _id: string;
@@ -731,13 +829,21 @@ export type SETTINGS_QUERYResult = {
   };
   footer: {
     _type: "footer";
-    shopLabel: null;
-    exploreTitle: null;
-    exploreLinks: null;
-    customerServiceTitle: null;
-    customerServiceLinks: null;
-    acknowledgement: null;
-    legalName: null;
+    shopLabel: string | null;
+    exploreTitle: string | null;
+    exploreLinks: Array<{
+      _key: string;
+      label: string;
+      href: string;
+    }> | null;
+    customerServiceTitle: string | null;
+    customerServiceLinks: Array<{
+      _key: string;
+      label: string;
+      href: string;
+    }> | null;
+    acknowledgement: string | null;
+    legalName: string | null;
     links: Array<{
       _type: "link";
       _key: string;
@@ -747,11 +853,44 @@ export type SETTINGS_QUERYResult = {
       openInNewTab: boolean;
     }> | null;
   };
-  contact: null;
+  contact: {
+    email: string | null;
+    phone: string | null;
+    instagramUrl: string | null;
+    instagramHandle: string | null;
+    address: string | null;
+    hours: Array<{
+      _key: string;
+      days: string;
+      hours: string;
+    }> | null;
+    note: string | null;
+    formEnabled: boolean | null;
+    formRecipient: string | null;
+    formSubjects: Array<string> | null;
+    formIntro: string | null;
+    formSuccessMessage: string | null;
+  } | null;
+  shipping: {
+    selectorLabel: string | null;
+    regions: Array<{
+      _key: string;
+      name: string;
+      lines: Array<string>;
+    }> | null;
+  } | null;
 } | null;
 // Variable: POLICY_PAGE_QUERY
 // Query: *[_type == "policyPage" && slug.current == $slug && section == $section][0]{    _id,    _type,    title,    lastUpdated,    "slug": slug.current,    section,    body  }
-export type POLICY_PAGE_QUERYResult = null;
+export type POLICY_PAGE_QUERYResult = {
+  _id: string;
+  _type: "policyPage";
+  title: string;
+  lastUpdated: string | null;
+  slug: string;
+  section: "pages" | "policies";
+  body: BlockContent | null;
+} | null;
 // Variable: HOME_QUERY
 // Query: *[_type == 'home' ][0]{    _type,    _id,    _updatedAt,    _createdAt,    "status": select(_id in path("drafts.**") => "draft", "published"),    "name": "Home",    "slug": "/",    "pageBuilder": pageBuilder[]{        _key,  _type,  "cover": cover[] {    _type,    "picture": select(_type == "picture" => {      asset,      crop,      hotspot,      alt,    }),    "color": select(_type == "color" => hex)  },  content,  "textColor": coalesce(textColor.hex, 'black'),  "columns": columns[] {    _key,    _type,    "columnSpan": select(_type == "imageBlock" => coalesce(columnSpan, 1), 1),    // productBlock    "product": select(_type == "productBlock" => product-> {      "title": store.title,      "slug": store.slug.current,      "price": store.priceRange.minVariantPrice,      "imageUrl": store.previewImageUrl,      "hoverMedia": gallery[featuredHover == true][0].media {        mediaType,        "imageUrl": select(mediaType == "image" => image.asset->url),        "playbackId": select(mediaType == "video" => video.asset->playbackId),      },    }),    // imageBlock   "items": select(_type == "imageBlock" => items[] {      mediaType,      "image": select(mediaType == "image" => {        "_type": "image",        "asset": image.asset,        "crop": image.crop,        "hotspot": image.hotspot,        "alt": image.alt,      }),      "video": select(mediaType == "video" => {        "playbackId": video.asset->playbackId,        "aspectRatio": video.asset->data.aspect_ratio,      }),    }),    "title": select(_type == "imageBlock" => title),    "description": select(_type == "imageBlock" => description),  }    },    pageSeo{  _type,  "title": coalesce(title, ^.name),  description,  ogImage}  }
 export type HOME_QUERYResult = {
@@ -1024,6 +1163,8 @@ export type ALL_PRODUCTS_QUERYResult = Array<{
   _rev: string;
   titleProxy?: ProxyString;
   slugProxy?: ProxyString;
+  colourway?: string;
+  productType?: ProductTypeReference;
   overwriteDefaultInformationFields?: "complementDefaults" | "noDefaults";
   productInformation?: Array<{
     _key: string;
@@ -1049,6 +1190,8 @@ export type MORE_PRODUCTS_QUERYResult = Array<{
   _rev: string;
   titleProxy?: ProxyString;
   slugProxy?: ProxyString;
+  colourway?: string;
+  productType?: ProductTypeReference;
   overwriteDefaultInformationFields?: "complementDefaults" | "noDefaults";
   productInformation?: Array<{
     _key: string;
@@ -1065,12 +1208,17 @@ export type MORE_PRODUCTS_QUERYResult = Array<{
   store?: ShopifyProduct;
 }>;
 // Variable: PRODUCT_QUERY
-// Query: *[_type == "product" && store.slug.current == $slug] [0] {    _type,    _id,    _updatedAt,    _createdAt,    overwriteDefaultInformationFields,    "defaultProductInformation": *[ _type == 'settings'][0].defaultProductInformation,    productInformation,    "status": select(_id in path("drafts.**") => "draft", "published"),    "name": coalesce(name, "Untitled Page"),    "slug": store.slug.current,   "gallery": gallery[] {      "mediaType": media.mediaType,      "image": select(media.mediaType == "image" => {        "_type": "image",        "asset": media.image.asset,        "crop": media.image.crop,        "hotspot": media.image.hotspot,        "alt": media.image.alt,      }),      "video": select(media.mediaType == "video" => {        "playbackId": media.video.asset->playbackId,        "aspectRatio": media.video.asset->data.aspect_ratio,      }),      "featuredHover": featuredHover,    },    pageBuilder[]{        _key,  _type,  "cover": cover[] {    _type,    "picture": select(_type == "picture" => {      asset,      crop,      hotspot,      alt,    }),    "color": select(_type == "color" => hex)  },  content,  "textColor": coalesce(textColor.hex, 'black'),  "columns": columns[] {    _key,    _type,    "columnSpan": select(_type == "imageBlock" => coalesce(columnSpan, 1), 1),    // productBlock    "product": select(_type == "productBlock" => product-> {      "title": store.title,      "slug": store.slug.current,      "price": store.priceRange.minVariantPrice,      "imageUrl": store.previewImageUrl,      "hoverMedia": gallery[featuredHover == true][0].media {        mediaType,        "imageUrl": select(mediaType == "image" => image.asset->url),        "playbackId": select(mediaType == "video" => video.asset->playbackId),      },    }),    // imageBlock   "items": select(_type == "imageBlock" => items[] {      mediaType,      "image": select(mediaType == "image" => {        "_type": "image",        "asset": image.asset,        "crop": image.crop,        "hotspot": image.hotspot,        "alt": image.alt,      }),      "video": select(mediaType == "video" => {        "playbackId": video.asset->playbackId,        "aspectRatio": video.asset->data.aspect_ratio,      }),    }),    "title": select(_type == "imageBlock" => title),    "description": select(_type == "imageBlock" => description),  }    },    pageSeo{  _type,  "title": coalesce(title, ^.name),  description,  ogImage}  }
+// Query: *[_type == "product" && store.slug.current == $slug] [0] {    _type,    _id,    _updatedAt,    _createdAt,    colourway,    "productType": productType->{title, excerpt},    overwriteDefaultInformationFields,    "defaultProductInformation": *[ _type == 'settings'][0].defaultProductInformation,    productInformation,    "status": select(_id in path("drafts.**") => "draft", "published"),    "name": coalesce(name, "Untitled Page"),    "slug": store.slug.current,   "gallery": gallery[] {      "mediaType": media.mediaType,      "image": select(media.mediaType == "image" => {        "_type": "image",        "asset": media.image.asset,        "crop": media.image.crop,        "hotspot": media.image.hotspot,        "alt": media.image.alt,      }),      "video": select(media.mediaType == "video" => {        "playbackId": media.video.asset->playbackId,        "aspectRatio": media.video.asset->data.aspect_ratio,      }),      "featuredHover": featuredHover,    },    pageBuilder[]{        _key,  _type,  "cover": cover[] {    _type,    "picture": select(_type == "picture" => {      asset,      crop,      hotspot,      alt,    }),    "color": select(_type == "color" => hex)  },  content,  "textColor": coalesce(textColor.hex, 'black'),  "columns": columns[] {    _key,    _type,    "columnSpan": select(_type == "imageBlock" => coalesce(columnSpan, 1), 1),    // productBlock    "product": select(_type == "productBlock" => product-> {      "title": store.title,      "slug": store.slug.current,      "price": store.priceRange.minVariantPrice,      "imageUrl": store.previewImageUrl,      "hoverMedia": gallery[featuredHover == true][0].media {        mediaType,        "imageUrl": select(mediaType == "image" => image.asset->url),        "playbackId": select(mediaType == "video" => video.asset->playbackId),      },    }),    // imageBlock   "items": select(_type == "imageBlock" => items[] {      mediaType,      "image": select(mediaType == "image" => {        "_type": "image",        "asset": image.asset,        "crop": image.crop,        "hotspot": image.hotspot,        "alt": image.alt,      }),      "video": select(mediaType == "video" => {        "playbackId": video.asset->playbackId,        "aspectRatio": video.asset->data.aspect_ratio,      }),    }),    "title": select(_type == "imageBlock" => title),    "description": select(_type == "imageBlock" => description),  }    },    pageSeo{  _type,  "title": coalesce(title, ^.name),  description,  ogImage}  }
 export type PRODUCT_QUERYResult = {
   _type: "product";
   _id: string;
   _updatedAt: string;
   _createdAt: string;
+  colourway: string | null;
+  productType: {
+    title: string;
+    excerpt: string | null;
+  } | null;
   overwriteDefaultInformationFields: "complementDefaults" | "noDefaults" | null;
   defaultProductInformation: Array<{
     _key: string;
@@ -1350,7 +1498,7 @@ export type ALL_STORE_PRODUCTS_QUERYResult = Array<{
 import "@sanity/client";
 declare module "@sanity/client" {
   interface SanityQueries {
-    "\n  *[_type == \"settings\"][0]{\n    _type,\n    _id,\n    _updatedAt,\n    _createdAt,\n    \"title\": coalesce(title, \"Untitled Store\"),\n    metadataBase,\n    defaultProductInformation,\n    header{\n      _type,\n      announcementBar{\n        _type,\n        content,\n        \"link\": links[0]{\n  _type,\n  _key,\n  linkType,\n  \"url\": select(\n    linkType == 'href' => href,\n    linkType == 'home' => '/',\n    linkType == 'plp' => '/products',\n    linkType == 'page' => '/' + page->slug.current,\n    linkType == 'product' => '/products/' + product->store.slug.current,\n    linkType == 'collection' => '/collections/' + collection->store.slug.current,\n  ),\n  \"label\": select(\n      label.length > 0 => label,\n      linkType == 'home' => 'Home',\n      linkType == 'plp' => 'All Products',\n      linkType == 'page' => page->name,\n      linkType == 'product' => product->store.title,\n      linkType == 'collection' => collection->store.title,\n      \"Link\"\n    ),\n  openInNewTab\n}\n      },\n      \"links\": links[]{\n  _type,\n  _key,\n  linkType,\n  \"url\": select(\n    linkType == 'href' => href,\n    linkType == 'home' => '/',\n    linkType == 'plp' => '/products',\n    linkType == 'page' => '/' + page->slug.current,\n    linkType == 'product' => '/products/' + product->store.slug.current,\n    linkType == 'collection' => '/collections/' + collection->store.slug.current,\n  ),\n  \"label\": select(\n      label.length > 0 => label,\n      linkType == 'home' => 'Home',\n      linkType == 'plp' => 'All Products',\n      linkType == 'page' => page->name,\n      linkType == 'product' => product->store.title,\n      linkType == 'collection' => collection->store.title,\n      \"Link\"\n    ),\n  openInNewTab\n}\n    },\n    footer{\n      _type,\n      shopLabel,\n      exploreTitle,\n      \"exploreLinks\": exploreLinks[]{_key, label, href},\n      customerServiceTitle,\n      \"customerServiceLinks\": customerServiceLinks[]{_key, label, href},\n      acknowledgement,\n      legalName,\n      \"links\": links[]{\n  _type,\n  _key,\n  linkType,\n  \"url\": select(\n    linkType == 'href' => href,\n    linkType == 'home' => '/',\n    linkType == 'plp' => '/products',\n    linkType == 'page' => '/' + page->slug.current,\n    linkType == 'product' => '/products/' + product->store.slug.current,\n    linkType == 'collection' => '/collections/' + collection->store.slug.current,\n  ),\n  \"label\": select(\n      label.length > 0 => label,\n      linkType == 'home' => 'Home',\n      linkType == 'plp' => 'All Products',\n      linkType == 'page' => page->name,\n      linkType == 'product' => product->store.title,\n      linkType == 'collection' => collection->store.title,\n      \"Link\"\n    ),\n  openInNewTab\n}\n    },\n    contact{\n      email,\n      phone,\n      instagramUrl,\n      instagramHandle,\n      address,\n      \"hours\": hours[]{_key, days, hours},\n      note,\n      formEnabled,\n      formRecipient,\n      formSubjects,\n      formIntro,\n      formSuccessMessage\n    },\n  }": SETTINGS_QUERYResult;
+    "\n  *[_type == \"settings\"][0]{\n    _type,\n    _id,\n    _updatedAt,\n    _createdAt,\n    \"title\": coalesce(title, \"Untitled Store\"),\n    metadataBase,\n    defaultProductInformation,\n    header{\n      _type,\n      announcementBar{\n        _type,\n        content,\n        \"link\": links[0]{\n  _type,\n  _key,\n  linkType,\n  \"url\": select(\n    linkType == 'href' => href,\n    linkType == 'home' => '/',\n    linkType == 'plp' => '/products',\n    linkType == 'page' => '/' + page->slug.current,\n    linkType == 'product' => '/products/' + product->store.slug.current,\n    linkType == 'collection' => '/collections/' + collection->store.slug.current,\n  ),\n  \"label\": select(\n      label.length > 0 => label,\n      linkType == 'home' => 'Home',\n      linkType == 'plp' => 'All Products',\n      linkType == 'page' => page->name,\n      linkType == 'product' => product->store.title,\n      linkType == 'collection' => collection->store.title,\n      \"Link\"\n    ),\n  openInNewTab\n}\n      },\n      \"links\": links[]{\n  _type,\n  _key,\n  linkType,\n  \"url\": select(\n    linkType == 'href' => href,\n    linkType == 'home' => '/',\n    linkType == 'plp' => '/products',\n    linkType == 'page' => '/' + page->slug.current,\n    linkType == 'product' => '/products/' + product->store.slug.current,\n    linkType == 'collection' => '/collections/' + collection->store.slug.current,\n  ),\n  \"label\": select(\n      label.length > 0 => label,\n      linkType == 'home' => 'Home',\n      linkType == 'plp' => 'All Products',\n      linkType == 'page' => page->name,\n      linkType == 'product' => product->store.title,\n      linkType == 'collection' => collection->store.title,\n      \"Link\"\n    ),\n  openInNewTab\n}\n    },\n    footer{\n      _type,\n      shopLabel,\n      exploreTitle,\n      \"exploreLinks\": exploreLinks[]{_key, label, href},\n      customerServiceTitle,\n      \"customerServiceLinks\": customerServiceLinks[]{_key, label, href},\n      acknowledgement,\n      legalName,\n      \"links\": links[]{\n  _type,\n  _key,\n  linkType,\n  \"url\": select(\n    linkType == 'href' => href,\n    linkType == 'home' => '/',\n    linkType == 'plp' => '/products',\n    linkType == 'page' => '/' + page->slug.current,\n    linkType == 'product' => '/products/' + product->store.slug.current,\n    linkType == 'collection' => '/collections/' + collection->store.slug.current,\n  ),\n  \"label\": select(\n      label.length > 0 => label,\n      linkType == 'home' => 'Home',\n      linkType == 'plp' => 'All Products',\n      linkType == 'page' => page->name,\n      linkType == 'product' => product->store.title,\n      linkType == 'collection' => collection->store.title,\n      \"Link\"\n    ),\n  openInNewTab\n}\n    },\n    contact{\n      email,\n      phone,\n      instagramUrl,\n      instagramHandle,\n      address,\n      \"hours\": hours[]{_key, days, hours},\n      note,\n      formEnabled,\n      formRecipient,\n      formSubjects,\n      formIntro,\n      formSuccessMessage\n    },\n    shipping{\n      selectorLabel,\n      \"regions\": regions[]{_key, name, lines}\n    },\n  }": SETTINGS_QUERYResult;
     "\n  *[_type == \"policyPage\" && slug.current == $slug && section == $section][0]{\n    _id,\n    _type,\n    title,\n    lastUpdated,\n    \"slug\": slug.current,\n    section,\n    body\n  }": POLICY_PAGE_QUERYResult;
     "\n  *[_type == 'home' ][0]{\n    _type,\n    _id,\n    _updatedAt,\n    _createdAt,\n    \"status\": select(_id in path(\"drafts.**\") => \"draft\", \"published\"),\n    \"name\": \"Home\",\n    \"slug\": \"/\",\n    \"pageBuilder\": pageBuilder[]{\n      \n  _key,\n  _type,\n  \"cover\": cover[] {\n    _type,\n    \"picture\": select(_type == \"picture\" => {\n      asset,\n      crop,\n      hotspot,\n      alt,\n    }),\n    \"color\": select(_type == \"color\" => hex)\n  },\n  content,\n  \"textColor\": coalesce(textColor.hex, 'black'),\n  \"columns\": columns[] {\n    _key,\n    _type,\n    \"columnSpan\": select(_type == \"imageBlock\" => coalesce(columnSpan, 1), 1),\n    // productBlock\n    \"product\": select(_type == \"productBlock\" => product-> {\n      \"title\": store.title,\n      \"slug\": store.slug.current,\n      \"price\": store.priceRange.minVariantPrice,\n      \"imageUrl\": store.previewImageUrl,\n      \"hoverMedia\": gallery[featuredHover == true][0].media {\n        mediaType,\n        \"imageUrl\": select(mediaType == \"image\" => image.asset->url),\n        \"playbackId\": select(mediaType == \"video\" => video.asset->playbackId),\n      },\n    }),\n    // imageBlock\n   \"items\": select(_type == \"imageBlock\" => items[] {\n      mediaType,\n      \"image\": select(mediaType == \"image\" => {\n        \"_type\": \"image\",\n        \"asset\": image.asset,\n        \"crop\": image.crop,\n        \"hotspot\": image.hotspot,\n        \"alt\": image.alt,\n      }),\n      \"video\": select(mediaType == \"video\" => {\n        \"playbackId\": video.asset->playbackId,\n        \"aspectRatio\": video.asset->data.aspect_ratio,\n      }),\n    }),\n    \"title\": select(_type == \"imageBlock\" => title),\n    \"description\": select(_type == \"imageBlock\" => description),\n  }\n\n    },\n    pageSeo{\n  _type,\n  \"title\": coalesce(title, ^.name),\n  description,\n  ogImage\n}\n  }\n": HOME_QUERYResult;
     "\n  *[_type == 'shop'][0]{\n    _type,\n    _id,\n    _updatedAt,\n    _createdAt,\n    \"status\": select(_id in path(\"drafts.**\") => \"draft\", \"published\"),\n    \"name\": \"Shop\",\n    \"slug\": \"/products\",\n    \"pageBuilder\": pageBuilder[]{\n      \n  _key,\n  _type,\n  \"cover\": cover[] {\n    _type,\n    \"picture\": select(_type == \"picture\" => {\n      asset,\n      crop,\n      hotspot,\n      alt,\n    }),\n    \"color\": select(_type == \"color\" => hex)\n  },\n  content,\n  \"textColor\": coalesce(textColor.hex, 'black'),\n  \"columns\": columns[] {\n    _key,\n    _type,\n    \"columnSpan\": select(_type == \"imageBlock\" => coalesce(columnSpan, 1), 1),\n    // productBlock\n    \"product\": select(_type == \"productBlock\" => product-> {\n      \"title\": store.title,\n      \"slug\": store.slug.current,\n      \"price\": store.priceRange.minVariantPrice,\n      \"imageUrl\": store.previewImageUrl,\n      \"hoverMedia\": gallery[featuredHover == true][0].media {\n        mediaType,\n        \"imageUrl\": select(mediaType == \"image\" => image.asset->url),\n        \"playbackId\": select(mediaType == \"video\" => video.asset->playbackId),\n      },\n    }),\n    // imageBlock\n   \"items\": select(_type == \"imageBlock\" => items[] {\n      mediaType,\n      \"image\": select(mediaType == \"image\" => {\n        \"_type\": \"image\",\n        \"asset\": image.asset,\n        \"crop\": image.crop,\n        \"hotspot\": image.hotspot,\n        \"alt\": image.alt,\n      }),\n      \"video\": select(mediaType == \"video\" => {\n        \"playbackId\": video.asset->playbackId,\n        \"aspectRatio\": video.asset->data.aspect_ratio,\n      }),\n    }),\n    \"title\": select(_type == \"imageBlock\" => title),\n    \"description\": select(_type == \"imageBlock\" => description),\n  }\n\n    },\n    pageSeo{\n  _type,\n  \"title\": coalesce(title, ^.name),\n  description,\n  ogImage\n}\n  }\n": SHOP_QUERYResult;
@@ -1359,7 +1507,7 @@ declare module "@sanity/client" {
     "\n  *[_type == \"collection\" && defined(store.slug.current) && !store.isDeleted] | order(date desc, _updatedAt desc) {\n    ...,\n  }\n": ALL_COLLECTIONS_QUERYResult;
     "\n  *[_type == \"product\" && defined(store.slug.current)] | order(date desc, _updatedAt desc) {\n    ...,\n  }\n": ALL_PRODUCTS_QUERYResult;
     "\n  *[_type == \"product\" && _id != $skip && defined(store.slug.current)] | order(date desc, _updatedAt desc) [0...$limit] {\n    ...,\n  }\n": MORE_PRODUCTS_QUERYResult;
-    "\n  *[_type == \"product\" && store.slug.current == $slug] [0] {\n    _type,\n    _id,\n    _updatedAt,\n    _createdAt,\n    overwriteDefaultInformationFields,\n    \"defaultProductInformation\": *[ _type == 'settings'][0].defaultProductInformation,\n    productInformation,\n    \"status\": select(_id in path(\"drafts.**\") => \"draft\", \"published\"),\n    \"name\": coalesce(name, \"Untitled Page\"),\n    \"slug\": store.slug.current,\n   \"gallery\": gallery[] {\n      \"mediaType\": media.mediaType,\n      \"image\": select(media.mediaType == \"image\" => {\n        \"_type\": \"image\",\n        \"asset\": media.image.asset,\n        \"crop\": media.image.crop,\n        \"hotspot\": media.image.hotspot,\n        \"alt\": media.image.alt,\n      }),\n      \"video\": select(media.mediaType == \"video\" => {\n        \"playbackId\": media.video.asset->playbackId,\n        \"aspectRatio\": media.video.asset->data.aspect_ratio,\n      }),\n      \"featuredHover\": featuredHover,\n    },\n    pageBuilder[]{\n      \n  _key,\n  _type,\n  \"cover\": cover[] {\n    _type,\n    \"picture\": select(_type == \"picture\" => {\n      asset,\n      crop,\n      hotspot,\n      alt,\n    }),\n    \"color\": select(_type == \"color\" => hex)\n  },\n  content,\n  \"textColor\": coalesce(textColor.hex, 'black'),\n  \"columns\": columns[] {\n    _key,\n    _type,\n    \"columnSpan\": select(_type == \"imageBlock\" => coalesce(columnSpan, 1), 1),\n    // productBlock\n    \"product\": select(_type == \"productBlock\" => product-> {\n      \"title\": store.title,\n      \"slug\": store.slug.current,\n      \"price\": store.priceRange.minVariantPrice,\n      \"imageUrl\": store.previewImageUrl,\n      \"hoverMedia\": gallery[featuredHover == true][0].media {\n        mediaType,\n        \"imageUrl\": select(mediaType == \"image\" => image.asset->url),\n        \"playbackId\": select(mediaType == \"video\" => video.asset->playbackId),\n      },\n    }),\n    // imageBlock\n   \"items\": select(_type == \"imageBlock\" => items[] {\n      mediaType,\n      \"image\": select(mediaType == \"image\" => {\n        \"_type\": \"image\",\n        \"asset\": image.asset,\n        \"crop\": image.crop,\n        \"hotspot\": image.hotspot,\n        \"alt\": image.alt,\n      }),\n      \"video\": select(mediaType == \"video\" => {\n        \"playbackId\": video.asset->playbackId,\n        \"aspectRatio\": video.asset->data.aspect_ratio,\n      }),\n    }),\n    \"title\": select(_type == \"imageBlock\" => title),\n    \"description\": select(_type == \"imageBlock\" => description),\n  }\n\n    },\n    pageSeo{\n  _type,\n  \"title\": coalesce(title, ^.name),\n  description,\n  ogImage\n}\n  }\n": PRODUCT_QUERYResult;
+    "\n  *[_type == \"product\" && store.slug.current == $slug] [0] {\n    _type,\n    _id,\n    _updatedAt,\n    _createdAt,\n    colourway,\n    \"productType\": productType->{title, excerpt},\n    overwriteDefaultInformationFields,\n    \"defaultProductInformation\": *[ _type == 'settings'][0].defaultProductInformation,\n    productInformation,\n    \"status\": select(_id in path(\"drafts.**\") => \"draft\", \"published\"),\n    \"name\": coalesce(name, \"Untitled Page\"),\n    \"slug\": store.slug.current,\n   \"gallery\": gallery[] {\n      \"mediaType\": media.mediaType,\n      \"image\": select(media.mediaType == \"image\" => {\n        \"_type\": \"image\",\n        \"asset\": media.image.asset,\n        \"crop\": media.image.crop,\n        \"hotspot\": media.image.hotspot,\n        \"alt\": media.image.alt,\n      }),\n      \"video\": select(media.mediaType == \"video\" => {\n        \"playbackId\": media.video.asset->playbackId,\n        \"aspectRatio\": media.video.asset->data.aspect_ratio,\n      }),\n      \"featuredHover\": featuredHover,\n    },\n    pageBuilder[]{\n      \n  _key,\n  _type,\n  \"cover\": cover[] {\n    _type,\n    \"picture\": select(_type == \"picture\" => {\n      asset,\n      crop,\n      hotspot,\n      alt,\n    }),\n    \"color\": select(_type == \"color\" => hex)\n  },\n  content,\n  \"textColor\": coalesce(textColor.hex, 'black'),\n  \"columns\": columns[] {\n    _key,\n    _type,\n    \"columnSpan\": select(_type == \"imageBlock\" => coalesce(columnSpan, 1), 1),\n    // productBlock\n    \"product\": select(_type == \"productBlock\" => product-> {\n      \"title\": store.title,\n      \"slug\": store.slug.current,\n      \"price\": store.priceRange.minVariantPrice,\n      \"imageUrl\": store.previewImageUrl,\n      \"hoverMedia\": gallery[featuredHover == true][0].media {\n        mediaType,\n        \"imageUrl\": select(mediaType == \"image\" => image.asset->url),\n        \"playbackId\": select(mediaType == \"video\" => video.asset->playbackId),\n      },\n    }),\n    // imageBlock\n   \"items\": select(_type == \"imageBlock\" => items[] {\n      mediaType,\n      \"image\": select(mediaType == \"image\" => {\n        \"_type\": \"image\",\n        \"asset\": image.asset,\n        \"crop\": image.crop,\n        \"hotspot\": image.hotspot,\n        \"alt\": image.alt,\n      }),\n      \"video\": select(mediaType == \"video\" => {\n        \"playbackId\": video.asset->playbackId,\n        \"aspectRatio\": video.asset->data.aspect_ratio,\n      }),\n    }),\n    \"title\": select(_type == \"imageBlock\" => title),\n    \"description\": select(_type == \"imageBlock\" => description),\n  }\n\n    },\n    pageSeo{\n  _type,\n  \"title\": coalesce(title, ^.name),\n  description,\n  ogImage\n}\n  }\n": PRODUCT_QUERYResult;
     "\n  *[_type == \"product\" && store.slug.current == $slug] [0] {\n    _type,\n    _id,\n    store\n  }\n": PRODUCT_METADATA_QUERYResult;
     "\n  *[_type == \"product\" && defined(store.slug.current)]\n  {\"slug\": store.slug.current}\n": ALL_PRODUCT_PAGES_SLUGSResult;
     "\n  *[_type == \"collection\" && defined(store.slug.current)]\n  {\"slug\": store.slug.current}\n": ALL_COLLECTION_PAGES_SLUGSResult;
