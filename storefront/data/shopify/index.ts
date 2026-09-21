@@ -138,10 +138,27 @@ const reshapeImages = (images: Connection<Image>, productTitle: string) => {
   });
 };
 
-const reshapeFeaturedImage = (image: Image, productTitle: string) => {
+// 4:5 grey placeholder so a product with no image can never crash the page.
+const PLACEHOLDER_IMAGE: Image = {
+  url:
+    "data:image/svg+xml;utf8," +
+    encodeURIComponent(
+      '<svg xmlns="http://www.w3.org/2000/svg" width="800" height="1000"><rect width="800" height="1000" fill="#f1f1f1"/></svg>',
+    ),
+  altText: "",
+  width: 800,
+  height: 1000,
+};
+
+const reshapeFeaturedImage = (
+  image: Image | null | undefined,
+  productTitle: string,
+  fallback?: Image,
+) => {
+  const source = image ?? fallback ?? PLACEHOLDER_IMAGE;
   return {
-    ...image,
-    altText: image.altText ?? `${productTitle}`,
+    ...source,
+    altText: source.altText ?? `${productTitle}`,
   };
 };
 
@@ -160,7 +177,11 @@ const reshapeProduct = (
 
   return {
     ...rest,
-    featuredImage: reshapeFeaturedImage(featuredImage, product.title),
+    featuredImage: reshapeFeaturedImage(
+      featuredImage,
+      product.title,
+      images?.edges?.[0]?.node,
+    ),
     images: reshapeImages(images, product.title),
     variants: removeEdgesAndNodes(variants),
   };

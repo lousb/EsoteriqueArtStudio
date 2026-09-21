@@ -21,7 +21,6 @@ import { getShipping } from "../../../data/shipping";
 
 type Props = {
   params: Promise<{ slug: string }>;
-  searchParams?: Promise<{ dbg?: string }>;
 };
 
 export async function generateStaticParams() {
@@ -57,27 +56,11 @@ export async function generateMetadata(
 
 export default async function Page(props: Props) {
   const params = await props.params;
-  // TEMPORARY DIAGNOSTIC: ?dbg=a,b,c skips parts of the page to find what crashes.
-  const dbg = ((await props.searchParams)?.dbg ?? "").split(",");
 
   const { tags, data: productPage } = await sanityFetch({
     query: PRODUCT_QUERY,
     params,
   });
-
-  if (dbg.includes("data")) {
-    const report: Record<string, unknown> = { shopify: isShopifyConfigured() };
-    try {
-      const p = await getProduct({ handle: params.slug, tags });
-      report.product = p ? { id: p.id, img: !!p.featuredImage?.url, variants: p.variants?.length, price: p.priceRange } : null;
-      const all = await getProducts({ sortKey: "TITLE", reverse: false, query: "" });
-      report.all = all.map((x) => ({ h: x.handle, img: !!x.featuredImage?.url, w: x.featuredImage?.width }));
-      report.shipping = (await getShipping()).regions.length;
-    } catch (e) {
-      report.error = String((e as { message?: string })?.message ?? JSON.stringify(e)).slice(0, 800);
-    }
-    return <pre>{JSON.stringify(report, null, 1)}</pre>;
-  }
 
   // Use live Shopify data when the Storefront API is configured; otherwise fall back to
   // the product data Sanity Connect already syncs into Sanity.
@@ -126,25 +109,24 @@ console.log("relatedProducts", relatedProducts.length);
 
   return (
     <Suspense>
-      {!dbg.includes("ld") && <script
+      <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: JSON.stringify(productJsonLd),
         }}
-      />}
+      />
       <ProductProvider>
         <div>
           <div className={s.page} data-product-page>
             <div className={s.gallery}>
-              {!dbg.includes("gallery") && <Gallery
+              <Gallery
                 variants={product.variants}
                 featuredImage={product.featuredImage}
                 sanityGallery={productPage?.gallery as any ?? []}
-              />}
+              />
             </div>
             <div className={s.productDetails}>
               <ProductDetails
-                dbg={dbg}
                 product={product}
                 colourway={extra?.colourway}
                 excerpt={extra?.productType?.excerpt}
@@ -153,7 +135,7 @@ console.log("relatedProducts", relatedProducts.length);
               />
             </div>
           </div>
-          {!dbg.includes("pb") && !!productPage?.pageBuilder?.length && (
+          {!!productPage?.pageBuilder?.length && (
             <PageBuilder page={productPage} />
           )}
         </div>
