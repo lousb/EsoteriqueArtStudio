@@ -153,9 +153,28 @@ body{
   cursor: not-allowed;
 }
 
-.add-to-cart__price,
 .add-to-cart__label-mobile {
   display: none;
+}
+
+/* Clipped window showing one line at a time. The slider holds two lines of equal
+   height (label, then "Added") and moves up by half its height to swap them. */
+.add-to-cart__window {
+  display: block;
+  height: 1.2em;
+  overflow: hidden;
+}
+
+.add-to-cart__slider {
+  display: block;
+  transition: transform 0.25s ease;
+}
+
+.add-to-cart__line {
+  display: block;
+  height: 1.2em;
+  line-height: 1.2em;
+  white-space: nowrap;
 }
 
 @media only screen and (max-width: 768px) {
@@ -163,7 +182,8 @@ body{
     aspect-ratio: 0.7 !important;
   }
   .add-to-cart{
-    justify-content: space-between;
+    justify-content: center;
+    text-align: center;
     border-radius: 4px;
     position: fixed !important;
     bottom: 10px;
@@ -172,9 +192,6 @@ body{
     width: calc(100% - 20px) !important;
     margin-block: 0px !important;
     padding: 20px !important;
-  }
-  .add-to-cart__price {
-    display: inline-block;
   }
   .add-to-cart__label-desktop {
     display: none;

@@ -6,12 +6,11 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Product, ProductVariant } from "../../shopify/types";
 import { useProduct } from "../products/[slug]/product-context";
 import { useCart } from "./cart-context";
-import { useCurrency } from "../../components/currency-provider";
 
 gsap.registerPlugin(ScrollTrigger);
 
 export function AddToCart({ product }: { product: Product }) {
-  const { variants, availableForSale, priceRange } = product;
+  const { variants, availableForSale } = product;
   const { addCartItem } = useCart();
   const { state } = useProduct();
   const [added, setAdded] = useState(false);
@@ -73,13 +72,6 @@ export function AddToCart({ product }: { product: Product }) {
   const selectedVariantId = variant?.id || defaultVariantId;
   const finalVariant = variants.find((v) => v.id === selectedVariantId)!;
 
-  const { format } = useCurrency();
-  const price = format(
-    priceRange.minVariantPrice.amount,
-    priceRange.minVariantPrice.currencyCode,
-    { compact: true },
-  ).text;
-
   const handleAdd = () => {
     if (!finalVariant || !availableForSale) return;
     addCartItem(finalVariant, product);
@@ -120,47 +112,17 @@ export function AddToCart({ product }: { product: Product }) {
         disabled={disabled}
         aria-label={label}
       >
-        {/* Price left. Only shown on the pinned mobile button. */}
-        <span
-          className="add-to-cart__price"
-          style={{
-            opacity: added ? 0 : 1,
-            transform: added ? "translateY(-100%)" : "translateY(0)",
-            transition: "opacity 0.25s ease, transform 0.25s ease",
-          }}
-        >
-          {price}
-        </span>
-        <span
-          style={{
-            display: "block",
-            position: "absolute",
-            top: "100%",
-            left: "0.85rem",
-            transform: added ? "translateY(-175%)" : "translateY(0)",
-            transition: "transform 0.25s ease",
-          }}
-        >
-          Added
-        </span>
-
-        {/* Label, slides up on added */}
-        <span
-          style={{
-            position: "relative",
-            height: "1.2em",
-            overflow: "hidden",
-            display: "inline-block",
-          }}
-        >
+        {/* Label and "Added" share one clipped window. Both are the same height,
+            so the pair slides up together and each sits centred in the button. */}
+        <span className="add-to-cart__window">
           <span
-            style={{
-              display: "block",
-              transform: added ? "translateY(-100%)" : "translateY(0)",
-              transition: "transform 0.25s ease",
-            }}
+            className="add-to-cart__slider"
+            style={{ transform: added ? "translateY(-50%)" : "translateY(0)" }}
           >
-            {labelContent}
+            <span className="add-to-cart__line">{labelContent}</span>
+            <span className="add-to-cart__line" aria-hidden="true">
+              Added
+            </span>
           </span>
         </span>
       </button>

@@ -146,6 +146,12 @@
 }
 
 @media (max-width: 768px) {
+  /* The add to cart button is pinned to the screen, so its empty slot in the
+     column shouldn't add a second gap above the price. */
+  .cart {
+    margin-top: 0;
+  }
+
   .copy {
     max-width: none;
   }

@@ -10,10 +10,12 @@ import {
   PRODUCT_METADATA_QUERY,
   PRODUCT_QUERY,
 } from "../../../data/sanity/queries";
-import { getProduct, getProducts, getProductRecommendations } from "../../../data/shopify";
+import { getCollectionProducts, getProduct, getProducts, getProductRecommendations } from "../../../data/shopify";
 import { getStoreProduct, getStoreProducts, isShopifyConfigured } from "../../../data/sanity/store-product";
 import { resolveOpenGraphImage } from "../../../sanity/utils";
 import s from "./page.module.css";
+
+const EYEWEAR_EXCERPT = "Premium eyewear. Fits most head shapes.";
 import { ProductProvider } from "./product-context";
 import { Gallery } from "./gallery";
 import { ProductDetails } from "./product-details";
@@ -86,6 +88,18 @@ console.log("relatedProducts", relatedProducts.length);
 
   const shipping = await getShipping();
 
+  // Only products in the Shopify "Eyewear" collection get the eyewear line under
+  // the price. Everything else (card holders and so on) shows nothing there.
+  let inEyewear = false;
+  if (useShopify) {
+    try {
+      const eyewear = await getCollectionProducts({ collection: "eyewear" });
+      inEyewear = eyewear.some((p) => p.handle === product.handle);
+    } catch {
+      inEyewear = false;
+    }
+  }
+
   // Cast keeps this compiling until types are regenerated from the new schema.
   const extra = productPage as unknown as {
     colourway?: string | null;
@@ -131,7 +145,7 @@ console.log("relatedProducts", relatedProducts.length);
               <ProductDetails
                 product={product}
                 colourway={extra?.colourway}
-                excerpt={extra?.productType?.excerpt}
+                excerpt={inEyewear ? EYEWEAR_EXCERPT : null}
                 relatedProducts={relatedProducts}
                 shipping={shipping}
               />
