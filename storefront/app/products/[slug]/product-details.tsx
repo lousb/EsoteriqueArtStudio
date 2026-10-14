@@ -61,6 +61,11 @@ export function ProductDetails({
   shipping: ShippingConfig;
 }) {
   const { minVariantPrice } = product.priceRange;
+  // Products tagged "made-to-order" in Shopify (the card holders) are handmade
+  // after purchase, so they get a longer lead time instead of the dispatch line.
+  const isMadeToOrder = (product.tags ?? []).some(
+    (t) => t.toLowerCase() === "made-to-order",
+  );
 
   return (
     <div className={s.details}>
@@ -92,8 +97,9 @@ export function ProductDetails({
       <section className={`${s.section} ${s.shipping}`}>
         <h2 className={s.heading}>Shipping</h2>
         <p className={s.copy}>
-          We aim to dispatch orders within 1-2 business days. All orders are
-          sent from our warehouse in Sydney, Australia.
+          {isMadeToOrder
+            ? "For custom made products, these are handmade pieces. Please allow 4-6 weeks for delivery."
+            : "We aim to dispatch orders within 1-2 business days. All orders are sent from our warehouse in Sydney, Australia."}
         </p>
         <ShippingSelector label={shipping.label} regions={shipping.regions} />
       </section>
@@ -106,9 +112,11 @@ export function ProductDetails({
             dangerouslySetInnerHTML={{ __html: product.descriptionHtml }}
           />
         ) : null}
+        {/* Our Process link hidden for now. Restore when the page is ready:
         <Link href="/our-process" className={s.link}>
           <span className={s.underline}>Our Process</span>
         </Link>
+        */}
       </section>
 
       <Link href="/pages/returns" className={`${s.link} ${s.returns}`}>

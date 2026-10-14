@@ -54,7 +54,17 @@ export function Gallery({
     ...sanityGallery.map((item, i) => ({
       key: `sanity-${i}`,
       content: (
-        <div style={{ position: "relative", width: "100%", aspectRatio: "4/5" }}>
+        <div
+          className={item.mediaType === "image" ? s.galleryBlend : undefined}
+          style={{
+            position: "relative",
+            width: "100%",
+            aspectRatio: "4/5",
+            // Match the featured image: grey backdrop + multiply, so white
+            // product-shot backgrounds blend into the page the same way.
+            backgroundColor: item.mediaType === "image" ? "#f1f1f1" : undefined,
+          }}
+        >
           {item.mediaType && (
             <MediaItem
               mediaType={item.mediaType}

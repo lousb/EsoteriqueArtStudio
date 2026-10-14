@@ -88,6 +88,10 @@ function toProduct(doc: StoreProduct): Product | undefined {
   const title = store.title ?? "";
   const options = (store.options ?? []).filter((o) => o?.name);
   const featuredImage = toImage(store.previewImageUrl, title);
+  const tags = store.tags ? store.tags.split(",").map((t) => t.trim()).filter(Boolean) : [];
+  // Made-to-order pieces (card holders) have no stock in Shopify, so Sanity
+  // Connect reports them as unavailable. They can always be ordered.
+  const madeToOrder = tags.some((t) => t.toLowerCase() === "made-to-order");
 
   const variants: ProductVariant[] = (doc?.variants ?? [])
     .filter((v): v is NonNullable<StoreVariant> => !!v?.store?.gid)
@@ -98,7 +102,7 @@ function toProduct(doc: StoreProduct): Product | undefined {
       return {
         id: s.gid!,
         title: s.title ?? "",
-        availableForSale: s.inventory?.isAvailable ?? true,
+        availableForSale: madeToOrder || (s.inventory?.isAvailable ?? true),
         image: toImage(s.previewImageUrl ?? store.previewImageUrl, title),
         selectedOptions: options
           .map((o, i) => ({ name: o.name!, value: values[i] ?? "" }))
@@ -130,7 +134,7 @@ function toProduct(doc: StoreProduct): Product | undefined {
     featuredImage,
     images: [featuredImage],
     seo: { title, description },
-    tags: store.tags ? store.tags.split(",").map((t) => t.trim()).filter(Boolean) : [],
+    tags,
     updatedAt: store.updatedAt ?? "",
   };
 }

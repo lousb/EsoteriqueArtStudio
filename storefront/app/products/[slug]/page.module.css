@@ -203,3 +203,7 @@
   background: #fff;
   transform: scale(1.2);
 }
+/* Sanity gallery images blend like the Shopify featured image */
+.galleryBlend img {
+  mix-blend-mode: multiply;
+}
