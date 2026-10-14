@@ -6,6 +6,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Product, ProductVariant } from "../../shopify/types";
 import { useProduct } from "../products/[slug]/product-context";
 import { useCart } from "./cart-context";
+import { useProductColour } from "./use-product-colour";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -15,6 +16,8 @@ export function AddToCart({ product }: { product: Product }) {
   const { state } = useProduct();
   const [added, setAdded] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
+  // The button takes the main colour of the product (from its photo).
+  const colour = useProductColour(product.featuredImage?.url);
 
   // On mobile the button is fixed to the bottom of the screen. When the end of
   // the product page reaches the bottom of the screen, GSAP docks it: the
@@ -111,6 +114,14 @@ export function AddToCart({ product }: { product: Product }) {
         type="submit"
         disabled={disabled}
         aria-label={label}
+        style={
+          colour
+            ? ({
+                "--atc-bg": colour.background,
+                "--atc-fg": colour.text,
+              } as React.CSSProperties)
+            : undefined
+        }
       >
         {/* Label and "Added" share one clipped window. Both are the same height,
             so the pair slides up together and each sits centred in the button. */}
