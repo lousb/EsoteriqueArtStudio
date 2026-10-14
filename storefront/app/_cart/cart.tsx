@@ -7,7 +7,8 @@ import { createPortal } from "react-dom";
 import { useFormStatus } from "react-dom";
 import Price from "../../components/price";
 import { useCurrency } from "../../components/currency-provider";
-import { FREE_EXPRESS_ITEMS } from "../../data/cart/config";
+import { EXPRESS_DISCOUNT_CODE, FREE_EXPRESS_ITEMS } from "../../data/cart/config";
+import { ExpressHold, formatClock, useExpressHold } from "./use-express-hold";
 import { DEFAULT_OPTION } from "../../shopify/constants";
 import { CartItem, Product } from "../../shopify/types";
 import { redirectToCheckout, saveCart } from "./cart-actions";
@@ -50,6 +51,7 @@ export function Cart({ suggestions = [] }: { suggestions?: Product[] }) {
 
   const isEmpty = !cart || cart.lines.length === 0;
   const count = cart?.totalQuantity ?? 0;
+  const hold = useExpressHold(count >= FREE_EXPRESS_ITEMS, isEmpty);
 
   return (
     <>
@@ -101,14 +103,14 @@ export function Cart({ suggestions = [] }: { suggestions?: Product[] }) {
             ) : (
               <>
                 <div className={s.cartHeader}>
-                  <span>[{count}] {count === 1 ? "Item" : "Items"}</span>
+                  <span>Your cart ({count})</span>
                   <button className={s.headerClose} onClick={closeCart}>
                     Close
                   </button>
                 </div>
 
                 <div className={s.cartBody}>
-                  <ShippingProgress count={count} />
+                  <ShippingProgress count={count} hold={hold} />
 
                   <ul className={s.itemList}>
                     {cart.lines.map((item) => (
@@ -138,7 +140,14 @@ export function Cart({ suggestions = [] }: { suggestions?: Product[] }) {
                       showCode
                     />
                   </p>
-                  <form action={() => { redirectToCheckout(cart); }}>
+                  <form
+                    action={() => {
+                      redirectToCheckout(
+                        cart,
+                        hold.active ? EXPRESS_DISCOUNT_CODE : undefined,
+                      );
+                    }}
+                  >
                     <CheckoutButton />
                   </form>
                   <p className={s.note}>
@@ -162,37 +171,45 @@ export function Cart({ suggestions = [] }: { suggestions?: Product[] }) {
   );
 }
 
-/** Numbered steps up to the free express goal, ending in a tick. */
-function ShippingProgress({ count }: { count: number }) {
+/** A thin bar that fills towards the free express goal, with a small counter. */
+function ShippingProgress({ count, hold }: { count: number; hold: ExpressHold }) {
   const goal = FREE_EXPRESS_ITEMS;
   const remaining = Math.max(goal - count, 0);
-  const steps = Array.from({ length: goal }, (_, i) => i); // 0 .. goal-1
 
-  const message =
-    remaining === 0
-      ? "Free express shipping unlocked"
-      : `Add ${remaining} more ${remaining === 1 ? "piece" : "pieces"} for free express shipping`;
+  const message = hold.expired
+    ? "Your express delivery hold has ended"
+    : remaining === 0
+      ? "Express delivery is on us. Check out within"
+      : `${remaining} more ${remaining === 1 ? "piece" : "pieces"} and express delivery is on us`;
+
+  const done = Math.min(count, goal);
+  const percent = (done / goal) * 100;
 
   return (
     <div className={s.progress}>
-      <p className={s.progressText}>{message}</p>
-      <div className={s.track} role="img" aria-label={message}>
-        {steps.map((i) => (
-          <span key={i} className={s.trackStep}>
-            {i > 0 && (
-              <span className={`${s.line} ${count >= i ? s.lineOn : ""}`} />
-            )}
-            <span className={`${s.node} ${count >= i ? s.nodeOn : ""}`}>{i}</span>
-          </span>
-        ))}
-        <span className={s.trackStep}>
-          <span className={`${s.line} ${count >= goal ? s.lineOn : ""}`} />
-          <span className={`${s.node} ${count >= goal ? s.nodeOn : ""}`}>
-            <svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true">
-              <path d="M2 6.5l2.6 2.6L10 3.5" stroke="currentColor" strokeWidth="1.4" fill="none" />
-            </svg>
-          </span>
+      <div className={s.progressHead}>
+        <p className={s.progressText}>
+          {message}
+          {hold.active ? (
+            <>
+              {" "}
+              <span className={s.progressTimer}>{formatClock(hold.remaining)}</span>
+            </>
+          ) : null}
+        </p>
+        <span className={s.progressCount}>
+          {done}/{goal}
         </span>
+      </div>
+      <div
+        className={s.bar}
+        role="progressbar"
+        aria-label={message}
+        aria-valuemin={0}
+        aria-valuemax={goal}
+        aria-valuenow={done}
+      >
+        <span className={s.barFill} style={{ width: `${percent}%` }} />
       </div>
     </div>
   );
@@ -243,11 +260,13 @@ function CartLine({
             {o.name}: {o.value}
           </p>
         ))}
-        <div className={`${s.meta} ${s.qty}`}>
-          <span>Qty: {item.quantity}</span>
+        <div className={s.stepper} role="group" aria-label="Quantity">
           <form action={() => update(item.merchandise.id, "minus")}>
             <button className={s.qtyButton} aria-label="Reduce quantity">−</button>
           </form>
+          <span className={s.qtyValue} aria-live="polite">
+            {item.quantity}
+          </span>
           <form action={() => update(item.merchandise.id, "plus")}>
             <button className={s.qtyButton} aria-label="Increase quantity">+</button>
           </form>
@@ -307,12 +326,6 @@ function Suggestions({
           <Link href={url} onClick={onNavigate} className={s.lineTitle}>
             {current.title}
           </Link>
-          {options.length > 1 && (
-            <span className={s.arrows}>
-              <button onClick={() => step(-1)} aria-label="Previous piece">‹</button>
-              <button onClick={() => step(1)} aria-label="Next piece">›</button>
-            </span>
-          )}
         </div>
         <p className={s.suggestionPrice}>
           <Price
@@ -329,6 +342,29 @@ function Suggestions({
           <Link href={url} onClick={onNavigate} className={s.addButton}>
             Choose options
           </Link>
+        )}
+        {options.length > 1 && (
+          <div className={s.pager}>
+            <button
+              type="button"
+              className={s.pagerButton}
+              onClick={() => step(-1)}
+              aria-label="Previous piece"
+            >
+              ‹
+            </button>
+            <span className={s.pagerCount}>
+              {(index % options.length) + 1}/{options.length}
+            </span>
+            <button
+              type="button"
+              className={s.pagerButton}
+              onClick={() => step(1)}
+              aria-label="Next piece"
+            >
+              ›
+            </button>
+          </div>
         )}
       </div>
     </div>

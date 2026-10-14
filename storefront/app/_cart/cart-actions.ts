@@ -9,10 +9,11 @@ export function saveCart(cart: Cart) {
   );
 }
 
-export function redirectToCheckout(cart: Cart) {
+export function redirectToCheckout(cart: Cart, discountCode?: string) {
   const checkoutParams = cart.lines.map((item) => {
     return item.merchandise.id.split("/").at(-1) + ":" + item.quantity;
   });
-  const cartPermalink = `${cart.checkoutUrl}${checkoutParams}`;
+  const discount = discountCode ? `?discount=${encodeURIComponent(discountCode)}` : "";
+  const cartPermalink = `${cart.checkoutUrl}${checkoutParams}${discount}`;
   redirect(cartPermalink);
 }

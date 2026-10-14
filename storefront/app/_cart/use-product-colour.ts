@@ -86,15 +86,28 @@ function pickColour(img: HTMLImageElement): ProductColour {
     Math.abs(((a >> 5) & 31) - ((b >> 5) & 31)) <= d &&
     Math.abs((a & 31) - (b & 31)) <= d;
 
-  let bestKey = -1;
-  let bestScore = 0;
+  // Score every bucket, and separately track the best clearly coloured one
+  // (not near-black or grey). Dark lenses, shadows and hardware are often the
+  // largest area in eyewear shots, so a real colour such as olive wins as long
+  // as there's a fair amount of it. Black products have almost no coloured
+  // pixels, so they still come out black.
+  const isChromatic = (key: number) => {
+    const r = (key >> 10) << 3, g = ((key >> 5) & 31) << 3, b = (key & 31) << 3;
+    const max = Math.max(r, g, b), min = Math.min(r, g, b);
+    return max > 40 && (max - min) / max > 0.25;
+  };
+
+  let bestKey = -1, bestScore = 0;
+  let colourKey = -1, colourScore = 0;
   for (const key of buckets.keys()) {
     let score = 0;
     for (const [k2, b2] of buckets) if (near(key, k2, 2)) score += b2.n;
-    if (score > bestScore) {
-      bestScore = score;
-      bestKey = key;
-    }
+    if (score > bestScore) { bestScore = score; bestKey = key; }
+    if (isChromatic(key) && score > colourScore) { colourScore = score; colourKey = key; }
+  }
+  if (colourKey >= 0 && colourScore >= bestScore * 0.35) {
+    bestKey = colourKey;
+    bestScore = colourScore;
   }
 
   // Too little product in the photo to trust: keep the default.

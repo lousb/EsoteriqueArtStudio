@@ -94,9 +94,17 @@ const allProducts = useShopify
   ? await getProducts({ sortKey: "TITLE", reverse: false, query: "" })
   : await getStoreProducts();
 const activeHandles = await getActiveHandles();
-const otherProducts = filterRecommendable(allProducts, activeHandles).filter(p => p.id !== product.id);
+// Recommend from the same category: card holders for card holders, eyewear for
+// eyewear. Category is the Shopify product type (eyewear has none set).
+const categoryOf = (p: { productType?: string }) =>
+  (p.productType || "Eyewear").trim().toLowerCase();
+const recommendable = filterRecommendable(allProducts, activeHandles).filter(p => p.id !== product.id);
+const sameCategory = recommendable.filter(p => categoryOf(p) === categoryOf(product));
+const otherProducts = sameCategory;
 const seed = product.id.split("").reduce((acc, c) => acc + c.charCodeAt(0), 0);
-const relatedProducts = [0, 1, 2].map(i => otherProducts[(seed + i) % otherProducts.length]).filter(Boolean);
+const relatedProducts = Array.from(
+  new Set([0, 1, 2].map(i => otherProducts[(seed + i) % otherProducts.length]).filter(Boolean)),
+);
 
 
   const shipping = await getShipping();

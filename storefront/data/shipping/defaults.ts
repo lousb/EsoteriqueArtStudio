@@ -17,7 +17,7 @@ export type ShippingConfig = {
   regions: ShippingRegion[];
 };
 
-export const DEFAULT_SHIPPING_LABEL = "Select a shipping location";
+export const DEFAULT_SHIPPING_LABEL = "Delivery to";
 
 export const DEFAULT_SHIPPING_REGIONS: ShippingRegion[] = [
   {

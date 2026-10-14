@@ -140,13 +140,13 @@ body{
   position: relative;
   overflow: hidden;
   /* Set per product from its photo (see use-product-colour.ts); black by default. */
-  background: var(--atc-bg, #000);
+  background-color: var(--atc-bg, #000);
   color: var(--atc-fg, #fff);
   border: 0;
   border-radius: 0;
   letter-spacing: 0.04em;
   cursor: pointer;
-  transition: background 0.2s ease;
+  transition: background-color 0.8s ease, color 0.8s ease;
 }
 
 /* Desktop only: extra room below the label. Mobile keeps its own padding. */
@@ -157,7 +157,7 @@ body{
 }
 
 .add-to-cart:disabled {
-  background: #888;
+  background-color: #888;
   cursor: not-allowed;
 }
 

@@ -134,6 +134,8 @@ export type ShopifyProduct = {
   images: Connection<Image>;
   seo: SEO;
   tags: string[];
+  /** Shopify product type, e.g. "Card Holder". Empty for eyewear. */
+  productType?: string;
   updatedAt: string;
 };
 

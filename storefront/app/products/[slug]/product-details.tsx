@@ -95,11 +95,11 @@ export function ProductDetails({
       {excerpt ? <p className={s.excerpt}>{excerpt}</p> : null}
 
       <section className={`${s.section} ${s.shipping}`}>
-        <h2 className={s.heading}>Shipping</h2>
+        <h2 className={s.heading}>Delivery</h2>
         <p className={s.copy}>
           {isMadeToOrder
             ? "For custom made products, these are handmade pieces. Please allow 4-6 weeks for delivery."
-            : "We aim to dispatch orders within 1-2 business days. All orders are sent from our warehouse in Sydney, Australia."}
+            : "Every order is packed by hand in our Sydney studio and sent within 1-2 business days."}
         </p>
         <ShippingSelector label={shipping.label} regions={shipping.regions} />
       </section>

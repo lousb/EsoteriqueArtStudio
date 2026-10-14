@@ -44,6 +44,7 @@ type StoreProduct = {
     previewImageUrl?: string | null;
     options?: { name?: string | null; values?: string[] | null }[] | null;
     tags?: string | null;
+    productType?: string | null;
     updatedAt?: string | null;
   } | null;
   variants?: StoreVariant[] | null;
@@ -135,6 +136,7 @@ function toProduct(doc: StoreProduct): Product | undefined {
     images: [featuredImage],
     seo: { title, description },
     tags,
+    productType: store.productType ?? "",
     updatedAt: store.updatedAt ?? "",
   };
 }

@@ -431,6 +431,7 @@ const storeProductFields = /* groq */ `
     previewImageUrl,
     options,
     tags,
+    productType,
     updatedAt
   },
   "variants": store.variants[]-> {
